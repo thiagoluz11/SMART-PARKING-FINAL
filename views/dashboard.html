@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Smart Parking</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <link rel="stylesheet" href="../assets/css/main.css">
+
+  <style>
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+      background: #1a1a1a !important;
+      color: #f0f0f0 !important;
+      border: 1px solid #333 !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,.7) !important;
+      border-radius: 14px !important;
+    }
+
+    .leaflet-popup-content { margin: 0 !important; }
+    .leaflet-popup-tip-container { display: none; }
+
+    .leaflet-control-zoom a {
+      background: #1a1a1a !important;
+      color: #f5a623 !important;
+      border-color: #333 !important;
+    }
+
+    .leaflet-control-zoom a:hover {
+      background: #222 !important;
+    }
+
+    #park-map,
+    .leaflet-container,
+    .leaflet-pane,
+    .leaflet-top,
+    .leaflet-bottom {
+      z-index: 1 !important;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999 !important;
+    }
+
+    .modal {
+      position: relative;
+      z-index: 10000 !important;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-lg);
+    }
+
+    .section-header h2 {
+      font-size: 1.2rem;
+      font-family: var(--font-display);
+    }
+
+    .vehicles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-md);
+    }
+
+    .filter-row {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr auto;
+      gap: var(--space-md);
+      align-items: end;
+      margin-bottom: var(--space-md);
+    }
+
+    @media(max-width:768px) {
+      .filter-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  /* Estilos para o Mapa Visual de Lugares */
+  .spots-grid-container {
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-md);
+  }
+
+.spots-layout {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  background: #1e1e1e;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.spot-cell {
+  padding: 8px;
+  text-align: center;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.spot-cell:hover:not(.occupied) {
+  background: #3a3a3a;
+  border-color: var(--color-accent);
+}
+
+.spot-cell.occupied {
+  background: #3d1a1a;
+  border-color: #8b0000;
+  color: #a0a0a0;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.spot-cell.selected {
+  background: var(--color-accent);
+  color: #000;
+  border-color: #fff;
+  box-shadow: 0 0 8px var(--color-accent);
+}
+
+/* Filter results count */
+.filter-results-count {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+.filter-results-count strong {
+  color: var(--color-accent);
+}
+
+/* Animacao de aceno de mao */
+.waving-hand {
+  animation: wave-animation 2.5s infinite;
+  transform-origin: 70% 70%;
+  display: inline-block;
+}
+
+@keyframes wave-animation {
+  0% { transform: rotate( 0.0deg) }
+  10% { transform: rotate(14.0deg) }
+  20% { transform: rotate(-8.0deg) }
+  30% { transform: rotate(14.0deg) }
+  40% { transform: rotate(-4.0deg) }
+  50% { transform: rotate(10.0deg) }
+  60% { transform: rotate( 0.0deg) }
+  100% { transform: rotate( 0.0deg) }
+}
+  </style>
+</head>
+
+<body data-page="dashboard">
+
+  <div id="navbar-placeholder"></div>
+
+  <main class="page-wrapper">
+    <div class="container section">
+
+      <h1 style="font-size:1.8rem;font-family:var(--font-display);margin-bottom:var(--space-2xl); display: flex; align-items: center; gap: 8px;">
+        <span id="user-greeting">Olá</span> <span class="waving-hand">👋</span>
+      </h1>
+
+      <div class="section-header">
+        <h2>Nossos parques no mapa</h2>
+      </div>
+
+      <div id="park-map" style="width:100%;height:360px;border-radius:var(--radius-lg);border:1px solid var(--color-border);margin-bottom:var(--space-xl);"></div>
+
+
+      <div style="margin-top:var(--space-2xl)">
+        <div class="section-header">
+          
+          <button class="btn btn-ghost btn-sm" id="btn-clear-filters" style="font-size:0.8rem">Limpar filtros</button>
+        </div>
+
+        <div class="filter-row">
+          <div class="form-group">
+            <label class="form-label">Procurar parque ou localização</label>
+            <input class="form-input" id="park-search" placeholder="Ex: Porto, Matosinhos, Trindade...">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Localização</label>
+            <select class="form-select" id="city-filter">
+              <option value="">Todas</option>
+              <option value="Porto">Porto</option>
+              <option value="Matosinhos">Matosinhos</option>
+              <option value="Gaia">Gaia</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Disponibilidade</label>
+            <select class="form-select" id="availability-filter">
+              <option value="">Todos</option>
+              <option value="available">Com lugares livres</option>
+              <option value="full">Lotados</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Preço máx./hora: <span id="price-value" style="color:var(--color-accent);font-weight:700">€10.00</span></label>
+            <input type="range" class="range-slider" id="price-filter" min="0" max="10" step="0.50" value="10">
+          </div>
+
+          <button class="btn btn-primary" style="height:42px" id="btn-apply-filters">
+            <span style="margin-right:4px"></span> Filtrar
+          </button>
+        </div>
+
+        <!-- Active filter tags -->
+        <div class="filter-tags" id="filter-tags"></div>
+
+        <!-- Results count -->
+        <div class="filter-results-count" id="filter-results-count"></div>
+      </div>
+
+      <div class="section-header">
+        <h2>Meus parques favoritos <span style="color:var(--color-accent)">★</span></h2>
+        <a href="admin-parks.html" id="add-park-link" style="font-size:0.85rem;color:var(--color-text-muted)">+ Adicionar parque</a>
+      </div>
+
+      <div class="grid-3" id="favorite-parks"></div>
+
+      <div class="section-header" style="margin-top:var(--space-2xl)">
+        <h2>Parques disponíveis agora</h2>
+        <a href="#" style="font-size:0.85rem;color:var(--color-accent)">Ver todas →</a>
+      </div>
+
+      <div class="grid-3" id="all-parks"></div>
+
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="modal-reserve">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Reservar Lugar</div>
+        <button class="modal-close">✕</button>
+      </div>
+
+      <form id="reserve-form">
+        <input type="hidden" id="reserve-park-id">
+
+        <div class="flex-col" style="gap:var(--space-md)">
+          <div style="padding:var(--space-md);background:var(--color-surface-2);border-radius:var(--radius-sm)">
+            <div style="font-size:0.8rem;color:var(--color-text-muted)">Parque selecionado</div>
+            <div style="font-weight:700;font-family:var(--font-display)" id="reserve-park-name">—</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Veículo</label>
+            <select class="form-select" id="reserve-vehicle">
+              <option>Nenhum veículo</option>
+            </select>
+            <!-- Campo invisível para guardar o ID do lugar selecionado pelo utilizador -->
+            <input type="hidden" id="selected-spot-id">
+
+          <div class="form-group spots-grid-container">
+          <label class="form-label">Selecione o Lugar de Estacionamento</label>
+          <div class="spots-layout" id="spots-grid">
+          <!-- Os lugares reais da BD serão renderizados aqui pelo JS -->
+          <div style="grid-column: span 5; text-align: center; color: var(--color-text-muted);">
+            A carregar lugares...
+          </div>
+        </div>
+      </div>
+            </div>
+          </div>
+
+          <!-- Opções de Tarifa -->
+          <div class="form-group" id="pricing-options-container" style="display:none; padding:var(--space-md); background:var(--color-surface-3); border-radius:var(--radius-sm); border:1px solid var(--color-border)">
+            <label class="form-label" style="margin-bottom: var(--space-xs)">Tipo de Tarifa</label>
+            <div style="display:flex; gap:var(--space-md)">
+              <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; cursor:pointer">
+                <input type="radio" name="fare-type" id="fare-hourly" value="hourly" checked> Horária (<span id="modal-hourly-rate">-</span>/h)
+              </label>
+              <label id="daily-option-wrapper" style="display:flex; align-items:center; gap:6px; font-size:0.85rem; cursor:pointer">
+                <input type="radio" name="fare-type" id="fare-daily" value="daily"> Bilhete Diário (<span id="modal-daily-rate">-</span>)
+              </label>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md)" id="date-time-fields">
+            <div class="form-group">
+              <label class="form-label">Data</label>
+              <input class="form-input" id="reserve-date" type="date" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Hora de início</label>
+              <input class="form-input" id="reserve-start" type="time" required>
+            </div>
+          </div>
+
+          <div class="form-group" id="end-time-field">
+            <label class="form-label">Hora de fim</label>
+            <input class="form-input" id="reserve-end" type="time" required>
+          </div>
+
+          <!-- Total a Pagar -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--space-md) var(--space-sm); border-top:1px solid var(--color-border); border-bottom:1px solid var(--color-border); margin-top:var(--space-sm)">
+            <span style="font-weight:600; font-size:0.95rem">Total a Pagar:</span>
+            <span style="font-family:var(--font-display); font-size:1.4rem; font-weight:800; color:var(--color-accent)" id="reserve-total-amount">€0.00</span>
+          </div>
+
+          <!-- Método de Pagamento (Cards Premium) -->
+          <div class="form-group" style="margin-top:var(--space-sm)">
+            <label class="form-label" style="margin-bottom:8px">Método de Pagamento</label>
+            <input type="hidden" id="payment-method-select" value="MBWay">
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;" id="payment-methods-grid">
+              <div class="payment-method-card active" data-method="MBWay" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px 8px; border:1.5px solid var(--color-accent); border-radius:var(--radius-md); background:var(--color-surface-2); cursor:pointer; transition:all var(--transition)">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/MB_Way_logo.svg" alt="MB WAY" style="height:20px; object-fit:contain">
+                <span style="font-size:0.75rem; font-weight:600">MB WAY</span>
+              </div>
+              <div class="payment-method-card" data-method="Cartao" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px 8px; border:1.5px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-surface); cursor:pointer; transition:all var(--transition)">
+                <span style="font-size:1.2rem">💳</span>
+                <span style="font-size:0.75rem; font-weight:600">Cartão</span>
+              </div>
+              <div class="payment-method-card" data-method="Multibanco" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px 8px; border:1.5px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-surface); cursor:pointer; transition:all var(--transition)">
+                <span style="font-size:1.2rem">🏦</span>
+                <span style="font-size:0.75rem; font-weight:600">Multibanco</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Campos dinâmicos do pagamento -->
+          <div id="payment-fields-container" style="background:var(--color-surface-2); padding:var(--space-md); border-radius:var(--radius-sm); border:1px solid var(--color-border); margin-bottom:var(--space-xs)">
+            <!-- MBWay -->
+            <div id="pay-field-mbway" class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:0.8rem">Nº Telemóvel MB WAY</label>
+              <input class="form-input" type="tel" id="pay-phone" placeholder="912 345 678" style="font-size:0.9rem">
+            </div>
+            <!-- Cartão -->
+            <div id="pay-field-cartao" class="form-group" style="display:none; margin-bottom:0">
+              <label class="form-label" style="font-size:0.8rem">Número do Cartão</label>
+              <input class="form-input" type="text" id="pay-card-num" placeholder="4000 1234 5678 9010" style="font-size:0.9rem; margin-bottom:8px">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+                <input class="form-input" type="text" id="pay-card-exp" placeholder="MM/AA" style="font-size:0.9rem">
+                <input class="form-input" type="text" id="pay-card-cvv" placeholder="CVC" style="font-size:0.9rem">
+              </div>
+            </div>
+            <!-- Multibanco -->
+            <div id="pay-field-multibanco" style="display:none; text-align:center; font-size:0.85rem; color:var(--color-text-muted)">
+              <div style="margin-bottom:4px">A entidade e referência serão geradas ao confirmar.</div>
+              <div>Poderá pagar no seu homebanking ou caixa ATM.</div>
+            </div>
+          </div>
+
+          <!-- Botões de Ação -->
+          <div style="display:flex; gap:12px; margin-top:var(--space-sm)">
+            <button class="btn btn-primary" type="submit" id="btn-pay-now" style="flex:1; height:44px; font-weight:700">
+              Pagar Agora
+            </button>
+            <button class="btn btn-ghost" type="button" id="btn-pay-later" style="flex:1; height:44px; font-weight:600; border-color:var(--color-border)">
+              Pagar Depois
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <div id="toast-container"></div>
+
+  <script src="../assets/js/View.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="../assets/js/map.js"></script>
+  <script src="../assets/js/reservations.js?v=2"></script>
+
+  <script>
+     let parks = [];
+    document.addEventListener('DOMContentLoaded', () => {
+
+      const storedUser = localStorage.getItem('user');
+      let user = null;
+     
+
+      try {
+        user = storedUser ? JSON.parse(storedUser) : null;
+      } catch (err) {
+        console.error('Erro ao ler o user na localStorage:', err);
+      }
+
+      document.body.insertAdjacentHTML('afterbegin', View.renderNavbar(user));
+      document.body.insertAdjacentHTML('beforeend', View.renderFooter());
+
+      if (!user) {
+        View.showPopup({
+          title: 'Sessão expirada',
+          message: 'Por favor, faça login novamente para continuar.',
+          type: 'warning',
+          redirect: 'login.html'
+        });
+        return;
+      }
+
+      const greetingEl = document.getElementById('user-greeting');
+
+      if (greetingEl) {
+        const firstName = user.name ? user.name.split(' ')[0] : 'Utilizador';
+        greetingEl.textContent = `Olá, ${firstName}`;
+      }
+
+      // Mostrar botão "+ Adicionar parque" apenas para utilizador com role admin
+      const addParkLink = document.getElementById('add-park-link');
+      if (addParkLink) {
+        if (user && user.role === 'admin') {
+          addParkLink.style.display = 'inline';
+        } else {
+          addParkLink.style.display = 'none';
+        }
+      }
+
+      let favoriteParks = [];
+      let favoriteParkIds = new Set();
+
+      async function loadFavorites() {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) return;
+          const response = await fetch('http://localhost:3000/users/me/favorites', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (response.ok) {
+            favoriteParks = await response.json();
+            favoriteParkIds = new Set(favoriteParks.map(p => p.id));
+          }
+        } catch (err) {
+          console.error('Erro ao carregar favoritos:', err);
+        }
+      }
+
+      const renderCards = (containerId, list, isFavoriteList = false) => {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+
+        if (list.length === 0) {
+          if (isFavoriteList) {
+            el.innerHTML = `
+              <div style="grid-column: 1 / -1; text-align: center; padding: var(--space-xl) var(--space-md); background: var(--color-surface-2); border-radius: var(--radius-lg); border: 1px dashed var(--color-border); color: var(--color-text-muted);">
+                <span style="font-size: 1.8rem; display: block; margin-bottom: 8px;">☆</span>
+                Ainda não tem parques favoritos. Clique na estrela de qualquer parque para o adicionar!
+              </div>`;
+          } else {
+            el.innerHTML = `<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">Nenhum parque encontrado.</p>`;
+          }
+          return;
+        }
+
+        el.innerHTML = list.map(p => View.renderParkCard(p, favoriteParkIds.has(p.id))).join('');
+        setupCardClicks(el);
+      };
+
+      function setupCardClicks(container) {
+        container.querySelectorAll('.btn-reserve').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            const id = Number(btn.dataset.id);
+            const park = parks.find(p => p.id === id);
+
+            if (park) {
+              MapModule.focusPark(park);
+            }
+
+           window.openReservationModal(id);
+          });
+        });
+      }
+
+      // ── Filter Tags Logic ──────────────────────────────────────────────
+      function updateFilterTags() {
+        const tagsContainer = document.getElementById('filter-tags');
+        if (!tagsContainer) return;
+        
+        const tags = [];
+        
+        const searchVal = document.getElementById('park-search')?.value.trim();
+        if (searchVal) {
+          tags.push({ label: `Pesquisa: "${searchVal}"`, filter: 'park-search' });
+        }
+        
+        const cityVal = document.getElementById('city-filter')?.value;
+        if (cityVal) {
+          tags.push({ label: `Cidade: ${cityVal}`, filter: 'city-filter' });
+        }
+        
+        const availVal = document.getElementById('availability-filter')?.value;
+        if (availVal) {
+          const availLabel = availVal === 'available' ? 'Com lugares' : 'Lotados';
+          tags.push({ label: `Disponibilidade: ${availLabel}`, filter: 'availability-filter' });
+        }
+        
+        const priceVal = parseFloat(document.getElementById('price-filter')?.value || 10);
+        if (priceVal < 10) {
+          tags.push({ label: `Preço máx: €${priceVal.toFixed(2)}/h`, filter: 'price-filter' });
+        }
+        
+        tagsContainer.innerHTML = tags.map(t => `
+          <div class="filter-tag" data-filter="${t.filter}">
+            ${t.label}
+            <span class="filter-tag-remove" data-filter="${t.filter}">✕</span>
+          </div>
+        `).join('');
+        
+        // Bind remove clicks
+        tagsContainer.querySelectorAll('.filter-tag-remove').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const filterId = btn.dataset.filter;
+            const el = document.getElementById(filterId);
+            if (el) {
+              if (el.type === 'range') {
+                el.value = el.max;
+                document.getElementById('price-value').textContent = `€${parseFloat(el.max).toFixed(2)}`;
+              } else if (el.tagName === 'SELECT') {
+                el.value = '';
+              } else {
+                el.value = '';
+              }
+            }
+            filterParks();
+          });
+        });
+      }
+
+      // ── Price Slider ──────────────────────────────────────────────────
+      const priceSlider = document.getElementById('price-filter');
+      const priceDisplay = document.getElementById('price-value');
+      if (priceSlider && priceDisplay) {
+        priceSlider.addEventListener('input', () => {
+          priceDisplay.textContent = `€${parseFloat(priceSlider.value).toFixed(2)}`;
+        });
+      }
+
+      async function loadParks() {
+        try {
+          await loadFavorites();
+
+          const response = await fetch('http://localhost:3000/api/parks');
+
+          if (!response.ok) {
+            throw new Error('Erro HTTP: ' + response.status);
+          }
+
+          parks = await response.json();
+
+          console.log('PARKS DA API:', parks);
+
+          MapModule.init('park-map', parks, (parkId) => {
+            window.openReservationModal(parkId);
+          });
+
+          // Init navbar search with park data
+          View.initNavSearch(parks, (parkId) => {
+            const park = parks.find(p => p.id === parkId);
+            if (park) {
+              MapModule.focusPark(park);
+              window.openReservationModal(parkId);
+            }
+          });
+
+          renderCards('favorite-parks', favoriteParks, true);
+          renderCards('all-parks', parks);
+
+          // ── Event Delegation para Estrela de Favoritos ──────────────────────
+          const handleFavoriteToggle = async (e) => {
+            const btn = e.target.closest('.btn-favorite');
+            if (!btn) return;
+            
+            e.stopPropagation();
+            e.preventDefault();
+
+            const parkId = Number(btn.dataset.id);
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const isCurrentlyFavorite = favoriteParkIds.has(parkId);
+
+            try {
+              if (isCurrentlyFavorite) {
+                // Remover dos favoritos
+                const res = await fetch(`http://localhost:3000/users/me/favorites/${parkId}`, {
+                  method: 'DELETE',
+                  headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                  favoriteParkIds.delete(parkId);
+                  favoriteParks = favoriteParks.filter(p => p.id !== parkId);
+                  View.showToast('Parque removido dos favoritos', 'info');
+                } else {
+                  const errData = await res.json();
+                  View.showToast(errData.error || 'Erro ao remover favorito', 'error');
+                  return;
+                }
+              } else {
+                // Adicionar aos favoritos
+                const res = await fetch('http://localhost:3000/users/me/favorites', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify({ id_park: parkId })
+                });
+                if (res.ok) {
+                  favoriteParkIds.add(parkId);
+                  const parkObj = parks.find(p => p.id === parkId);
+                  if (parkObj && !favoriteParks.some(p => p.id === parkId)) {
+                    favoriteParks.push(parkObj);
+                  }
+                  View.showToast('Parque adicionado aos favoritos', 'success');
+                } else {
+                  const errData = await res.json();
+                  View.showToast(errData.error || 'Erro ao adicionar favorito', 'error');
+                  return;
+                }
+              }
+
+              // Atualizar o estado visual de todos os botões correspondentes ao mesmo parque na página
+              document.querySelectorAll(`.btn-favorite[data-id="${parkId}"]`).forEach(b => {
+                const active = favoriteParkIds.has(parkId);
+                if (active) {
+                  b.classList.add('active');
+                  b.textContent = '★';
+                  b.title = 'Remover dos favoritos';
+                } else {
+                  b.classList.remove('active');
+                  b.textContent = '☆';
+                  b.title = 'Adicionar aos favoritos';
+                }
+              });
+
+              // Re-renderizar a secção de favoritos
+              renderCards('favorite-parks', favoriteParks, true);
+
+            } catch (err) {
+              console.error('Erro ao atualizar favorito:', err);
+              View.showToast('Erro de ligação ao servidor', 'error');
+            }
+          };
+
+          document.getElementById('favorite-parks')?.addEventListener('click', handleFavoriteToggle);
+          document.getElementById('all-parks')?.addEventListener('click', handleFavoriteToggle);
+
+          // Check if there was a selected park redirect from another page
+          const redirectParkId = localStorage.getItem('selectedParkId');
+          if (redirectParkId) {
+            localStorage.removeItem('selectedParkId');
+            const park = parks.find(p => p.id === Number(redirectParkId));
+            if (park) {
+              setTimeout(() => {
+                MapModule.focusPark(park);
+                window.openReservationModal(redirectParkId);
+              }, 500);
+            }
+          }
+
+        } catch (err) {
+          console.error('Erro ao carregar parques:', err);
+          View.showToast('Erro ao carregar parques', 'error');
+        }
+      }
+
+      function filterParks() {
+        const searchValue = document.getElementById('park-search')?.value.toLowerCase() || '';
+        const cityValue = document.getElementById('city-filter')?.value || '';
+        const availValue = document.getElementById('availability-filter')?.value || '';
+        const priceValue = parseFloat(document.getElementById('price-filter')?.value || 10);
+
+        const filtered = parks.filter(p => {
+          const matchesSearch =
+            p.name.toLowerCase().includes(searchValue) ||
+            p.city.toLowerCase().includes(searchValue) ||
+            p.address.toLowerCase().includes(searchValue);
+
+          const matchesCity = cityValue === '' || p.city === cityValue;
+
+          const matchesAvailability = 
+            availValue === '' ||
+            (availValue === 'available' && p.available > 0) ||
+            (availValue === 'full' && p.available === 0);
+
+          const matchesPrice = !p.price_per_hour || p.price_per_hour <= priceValue;
+
+          return matchesSearch && matchesCity && matchesAvailability && matchesPrice;
+        });
+
+        MapModule.updateParks(filtered);
+        renderCards('all-parks', filtered);
+        
+        // Update results count
+        const countEl = document.getElementById('filter-results-count');
+        if (countEl) {
+          const hasFilters = searchValue || cityValue || availValue || priceValue < 10;
+          countEl.innerHTML = hasFilters 
+            ? `Mostrando <strong>${filtered.length}</strong> de <strong>${parks.length}</strong> parques`
+            : '';
+        }
+        
+        // Update filter tags
+        updateFilterTags();
+      }
+
+      document.getElementById('park-search')?.addEventListener('input', filterParks);
+      document.getElementById('city-filter')?.addEventListener('change', filterParks);
+      document.getElementById('availability-filter')?.addEventListener('change', filterParks);
+      document.getElementById('price-filter')?.addEventListener('input', filterParks);
+      document.getElementById('btn-apply-filters')?.addEventListener('click', filterParks);
+      
+      // Clear all filters
+      document.getElementById('btn-clear-filters')?.addEventListener('click', () => {
+        document.getElementById('park-search').value = '';
+        document.getElementById('city-filter').value = '';
+        document.getElementById('availability-filter').value = '';
+        document.getElementById('price-filter').value = '10';
+        document.getElementById('price-value').textContent = '€10.00';
+        filterParks();
+      });
+
+      loadParks();
+      
+
+    });
+  </script>
+
+</body>
+</html>

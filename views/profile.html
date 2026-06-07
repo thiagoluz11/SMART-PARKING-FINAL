@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Perfil — Smart Parking</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .profile-layout { display: grid; grid-template-columns: 300px 1fr; gap: var(--space-2xl); }
+    @media(max-width:900px) { .profile-layout { grid-template-columns: 1fr; } }
+
+    .avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 2rem; font-weight: 800; color: #111;
+      margin-bottom: var(--space-md);
+    }
+
+    .profile-sidebar {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      height: fit-content;
+    }
+
+    .sidebar-nav { margin-top: var(--space-xl); display: flex; flex-direction: column; gap: 4px; }
+    .sidebar-link {
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex; align-items: center; gap: var(--space-sm);
+      text-decoration: none;
+    }
+    .sidebar-link:hover, .sidebar-link.active {
+      background: var(--color-surface-2);
+      color: var(--color-text);
+    }
+    .sidebar-link.active { color: var(--color-accent); }
+
+    .vehicle-card {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      position: relative;
+    }
+    .btn-delete-vehicle {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      color: var(--color-danger);
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all var(--transition);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-delete-vehicle:hover {
+      opacity: 1;
+      transform: scale(1.15);
+      background: rgba(239, 68, 68, 0.1);
+    }
+  </style>
+</head>
+<body data-page="profile">
+
+  <main class="page-wrapper">
+    <div class="container section">
+
+      <div class="section-label">Conta</div>
+      <h1 class="section-title" style="margin-bottom:var(--space-2xl)">Meu Perfil</h1>
+
+      <div class="profile-layout">
+
+        <!-- Sidebar -->
+        <aside class="profile-sidebar">
+          <div class="avatar" id="avatar-initials">?</div>
+          <div style="font-weight:700;font-family:var(--font-display)" id="sidebar-name">A carregar...</div>
+          <div style="font-size:0.85rem;color:var(--color-text-muted)" id="sidebar-email">—</div>
+          <div class="sidebar-nav">
+            <div class="sidebar-link active"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNkM2MzMGIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS11c2VyLWljb24gbHVjaWRlLXVzZXIiPjxwYXRoIGQ9Ik0xOSAyMXYtMmE0IDQgMCAwIDAtNC00SDlhNCA0IDAgMCAwLTQgNHYyIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSI3IiByPSI0Ii8+PC9zdmc+" alt="User profile icon representing personal data section"> Dados Pessoais</div>
+            <a href="reservations.html" class="sidebar-link"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMS4yNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1jYWxlbmRhcjEtaWNvbiBsdWNpZGUtY2FsZW5kYXItMSI+PHBhdGggZD0iTTExIDE0aDF2NCIvPjxwYXRoIGQ9Ik0xNiAydjQiLz48cGF0aCBkPSJNMyAxMGgxOCIvPjxwYXRoIGQ9Ik04IDJ2NCIvPjxyZWN0IHg9IjMiIHk9IjQiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiLz48L3N2Zz4="> Reservas</a>
+            <div class="sidebar-link" style="color:var(--color-danger)" id="btn-sidebar-logout"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZjBmMGYiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1kb29yLW9wZW4taWNvbiBsdWNpZGUtZG9vci1vcGVuIj48cGF0aCBkPSJNMTEgMjBIMiIvPjxwYXRoIGQ9Ik0xMSA0LjU2MnYxNi4xNTdhMSAxIDAgMCAwIDEuMjQyLjk3TDE5IDIwVjUuNTYyYTIgMiAwIDAgMC0xLjUxNS0xLjk0bC00LTFBMiAyIDAgMCAwIDExIDQuNTYxeiIvPjxwYXRoIGQ9Ik0xMSA0SDhhMiAyIDAgMCAwLTIgMnYxNCIvPjxwYXRoIGQ9Ik0xNCAxMmguMDEiLz48cGF0aCBkPSJNMjIgMjBoLTMiLz48L3N2Zz4=">Terminar Sessão</div>
+          </div>
+        </aside>
+
+        <!-- Main content -->
+        <div class="flex-col" style="gap:var(--space-xl)">
+
+          <!-- Dados Pessoais -->
+          <div class="card" style="padding:var(--space-xl)">
+            <h2 style="font-size:1.1rem;font-family:var(--font-display);margin-bottom:var(--space-xl)">Dados Pessoais</h2>
+            <form id="profile-form">
+              <div class="flex-col" style="gap:var(--space-md)">
+                <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md)">
+                  <div class="form-group">
+                    <label class="form-label">Nome completo</label>
+                    <input class="form-input" id="profile-name" type="text" placeholder="O teu nome">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input class="form-input" id="profile-email" type="email" placeholder="O teu email">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Contacto</label>
+                  <input class="form-input" id="profile-contact" type="tel" placeholder="+351 9xx xxx xxx">
+                </div>
+                <div class="flex-gap" style="justify-content:flex-end;align-items:center;gap:var(--space-md)">
+                  <span id="profile-msg" style="font-size:0.85rem;color:var(--color-success)"></span>
+                  <button class="btn btn-primary" type="submit">Guardar alterações</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Veículos -->
+         <div class="card" style="padding:var(--space-xl)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-lg)">
+            <h2 style="font-size:1.1rem;font-family:var(--font-display)">Meus Veículos</h2>
+            <a href="add-vehicle.html" class="btn btn-primary" style="font-size:0.85rem;padding:8px 16px">+ Adicionar Veículo</a>
+          </div>
+          <div id="vehicles-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:var(--space-md)">
+            <div style="color:var(--color-text-muted);font-size:0.9rem">A carregar...</div>
+          </div>
+        </div>
+          <!-- Reservas Recentes -->
+          <div class="card" style="padding:var(--space-xl)">
+            <div class="flex-between" style="margin-bottom:var(--space-lg)">
+              <h2 style="font-size:1.1rem;font-family:var(--font-display)">Reservas Recentes</h2>
+              <a href="reservations.html" style="font-size:0.85rem;color:var(--color-accent)">Ver todas →</a>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Parque</th>
+                    <th>Lugar</th>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Estado</th>
+                    <th>Valor</th>
+                  </tr>
+                </thead>
+                <tbody id="profile-reservations">
+                  <tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:var(--space-lg)">Sem reservas recentes.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toast-container"></div>
+  
+
+  <script src="../assets/js/View.js"></script>
+  <script src="../assets/js/vehicles.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Ler sessão
+    const token = localStorage.getItem('token');
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem('user'));
+    } catch (e) {}
+
+    if (!user || !token) {
+      View.showPopup({
+        title: 'Sessão expirada',
+        message: 'Por favor, faça login novamente para continuar.',
+        type: 'warning',
+        redirect: 'login.html'
+      });
+      return;
+    }
+
+    // 2. Injetar Navbar e Footer
+    document.body.insertAdjacentHTML('afterbegin', View.renderNavbar(user));
+    document.body.insertAdjacentHTML('beforeend',  View.renderFooter());
+
+    // 3. Logout
+    const handleLogout = async (e) => {
+      e.preventDefault();
+      const confirmLogout = await View.showConfirm({
+        title: 'Terminar Sessão',
+        message: 'Tem a certeza que deseja terminar a sessão?',
+        type: 'warning',
+        confirmText: 'Sair',
+        cancelText: 'Cancelar'
+      });
+      if (confirmLogout) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+      }
+    };
+
+    document.getElementById('btn-logout')?.addEventListener('click', handleLogout);
+    document.getElementById('btn-sidebar-logout')?.addEventListener('click', handleLogout);
+
+    // ── Função auxiliar: preencher sidebar e avatar ─────────────────────
+    function fillSidebar(u) {
+      const initials = u.name
+        ? u.name.split(' ').slice(0, 2).map(n => n[0].toUpperCase()).join('')
+        : '?';
+      document.getElementById('avatar-initials').textContent = initials;
+      document.getElementById('sidebar-name').textContent   = u.name  || '—';
+      document.getElementById('sidebar-email').textContent  = u.email || '—';
+    }
+
+    // ── Função auxiliar: preencher formulário ───────────────────────────
+    function fillForm(u) {
+      document.getElementById('profile-name').value    = u.name    || '';
+      document.getElementById('profile-email').value   = u.email   || '';
+      document.getElementById('profile-contact').value = u.contact || '';
+    }
+
+    // 4. Preencher com dados do localStorage imediatamente (sem esperar fetch)
+    fillSidebar(user);
+    fillForm(user);
+
+    // 5. Ir buscar dados frescos à BD via GET /users/me
+    try {
+      const res = await fetch('http://localhost:3000/users/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        const freshUser = await res.json();
+
+        // Atualizar localStorage com dados frescos
+        const merged = { ...user, ...freshUser };
+        localStorage.setItem('user', JSON.stringify(merged));
+
+        // Atualizar UI
+        fillSidebar(merged);
+        fillForm(merged);
+      } else if (res.status === 403) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+        return;
+      }
+    } catch (err) {
+      console.warn('Não foi possível refrescar o perfil:', err.message);
+      // Continua com os dados do localStorage
+    }
+
+    // 6. Guardar alterações do perfil — PUT /users/me
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name    = document.getElementById('profile-name').value.trim();
+      const email   = document.getElementById('profile-email').value.trim();
+      const contact = document.getElementById('profile-contact').value.trim();
+      const msgEl   = document.getElementById('profile-msg');
+
+      msgEl.textContent = '';
+      msgEl.style.color = 'var(--color-success)';
+
+      try {
+        const res = await fetch('http://localhost:3000/users/me', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name, email, contact })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          // Atualizar localStorage com dados atualizados
+          const updated = { ...user, ...data.user };
+          localStorage.setItem('user', JSON.stringify(updated));
+          user = updated;
+
+          fillSidebar(updated);
+          msgEl.textContent = '✓ Perfil guardado com sucesso!';
+          View.showToast('Perfil atualizado!', 'success');
+        } else {
+          msgEl.style.color = 'var(--color-danger)';
+          msgEl.textContent = data.error || 'Erro ao guardar.';
+        }
+      } catch (err) {
+        msgEl.style.color = 'var(--color-danger)';
+        msgEl.textContent = 'Erro ao ligar ao servidor.';
+      }
+    });
+
+    loadVehicles(token); // Carregar veículos do utilizador
+    initVehicleModal(token); 
+    loadReservations(token); // Carregar as reservas reais do utilizador
+    loadParksForNav(); // Inicializar pesquisa da navbar
+
+    async function loadParksForNav() {
+      try {
+        const response = await fetch('http://localhost:3000/api/parks');
+        if (response.ok) {
+          const parks = await response.json();
+          View.initNavSearch(parks);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar parques para pesquisa da navbar:', err);
+      }
+    }
+
+    async function loadReservations(token) {
+      const tbody = document.getElementById('profile-reservations');
+      if (!tbody) return;
+      
+      try {
+        const [parksRes, resRes] = await Promise.all([
+          fetch('http://localhost:3000/api/parks'),
+          fetch('http://localhost:3000/reservations/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+        ]);
+        
+        if (parksRes.ok && resRes.ok) {
+          const parks = await parksRes.json();
+          const reservations = await resRes.json();
+          
+          if (reservations.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:var(--space-lg)">Sem reservas recentes.</td></tr>';
+            return;
+          }
+          
+          // Sort by date & time descending, get top 3
+          reservations.sort((a, b) => new Date(b.date + 'T' + b.start_time) - new Date(a.date + 'T' + a.start_time));
+          const recent = reservations.slice(0, 3);
+          
+          tbody.innerHTML = recent.map(r => {
+            const parkId = r.ParkingSpot?.id_park;
+            const park = parks.find(p => p.id === parkId);
+            const parkName = park ? park.name : `Parque #${parkId}`;
+            const spotNumber = r.ParkingSpot?.spot_number || `Lugar #${r.id_spot}`;
+            
+            const statusMap = {
+              active:    { label: 'Ativa',      cls: 'success' },
+              confirmed: { label: 'Confirmada', cls: 'success' },
+              pending:   { label: 'Pendente',   cls: 'warning' },
+              completed: { label: 'Concluída',  cls: 'neutral' },
+              cancelled: { label: 'Cancelada',  cls: 'danger' },
+            };
+            const s = statusMap[r.status] || { label: r.status, cls: 'neutral' };
+            
+            let amountStr = '-';
+            if (r.Payment && r.Payment.amount !== undefined && r.Payment.amount !== null) {
+              amountStr = `€${Number(r.Payment.amount).toFixed(2)}`;
+            } else if (r.start_time && r.end_time) {
+              const [sh, sm] = r.start_time.split(':').map(Number);
+              const [eh, em] = r.end_time.split(':').map(Number);
+              const hours = (eh + em/60) - (sh + sm/60);
+              if (hours > 0) {
+                amountStr = `€${(hours * 1.50).toFixed(2)}`;
+              }
+            }
+            
+            return `
+              <tr>
+                <td>${parkName}</td>
+                <td>${spotNumber}</td>
+                <td>${r.date}</td>
+                <td>${r.start_time} – ${r.end_time}</td>
+                <td><span class="badge badge-${s.cls}">${s.label}</span></td>
+                <td>${amountStr}</td>
+              </tr>`;
+          }).join('');
+        }
+      } catch (err) {
+        console.error('Erro ao carregar reservas:', err);
+      }
+    }
+  });
+  </script>
+</body>
+</html>

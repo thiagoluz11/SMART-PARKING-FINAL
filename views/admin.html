@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Smart Parking</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .admin-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 64px); }
+    @media(max-width:900px) { .admin-layout { grid-template-columns: 1fr; } }
+
+    .admin-sidebar {
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      padding: var(--space-xl) var(--space-md);
+      position: sticky; top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+
+    .admin-logo {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: var(--space-xs);
+    }
+    .admin-badge {
+      font-size: 0.7rem;
+      color: var(--color-accent);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-xl);
+    }
+
+    .admin-nav { display: flex; flex-direction: column; gap: 4px; }
+    .admin-nav-link {
+      display: flex; align-items: center; gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+      text-decoration: none;
+    }
+    .admin-nav-link:hover { background: var(--color-surface-2); color: var(--color-text); }
+    .admin-nav-link.active { background: var(--color-accent-glow); color: var(--color-accent); font-weight: 600; }
+
+    .admin-footer {
+      margin-top: auto;
+      padding-top: var(--space-xl);
+      border-top: 1px solid var(--color-border);
+      font-size: 0.8rem;
+      color: var(--color-text-faint);
+    }
+
+    .admin-content { padding: var(--space-2xl); overflow-y: auto; }
+
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-lg); margin-bottom: var(--space-2xl); }
+    @media(max-width:900px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); }
+    @media(max-width:1100px) { .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body data-page="admin">
+
+  <div id="navbar-placeholder"></div>
+
+  <main class="page-wrapper">
+    <div class="admin-layout">
+
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-logo"><span class="text-accent">Smart</span> Parking</div>
+        <div class="admin-badge">Painel Admin</div>
+        <hr style="border-color:var(--color-border);margin-bottom:var(--space-lg)">
+        <nav class="admin-nav">
+          <a href="admin.html" class="admin-nav-link active"> Dashboard</a>
+          <a href="admin-parks.html" class="admin-nav-link"> Parques</a>
+          <a href="admin-users.html" class="admin-nav-link"> Utilizadores</a>
+          <a href="admin-reservations.html" class="admin-nav-link"> Reservas</a>
+          <a href="admin-stats.html" class="admin-nav-link"> Estatísticas</a>
+        </nav>
+        <div class="admin-footer" style="margin-top:var(--space-2xl)">
+          <div>Admin</div>
+        </div>
+      </aside>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="flex-between" style="margin-bottom:var(--space-2xl)">
+          <div>
+            <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:800">Dashboard</h1>
+            <p style="color:var(--color-text-muted);font-size:0.9rem">Visão geral do sistema Smart Parking</p>
+          </div>
+          
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+          <div class="stat-card" id="stat-reservations">
+            <div class="stat-label">Reservas Totais</div>
+            <div class="stat-value">—</div>
+            <div class="stat-change up">—</div>
+          </div>
+          <div class="stat-card" id="stat-users">
+            <div class="stat-label">Utilizadores</div>
+            <div class="stat-value">—</div>
+            <div class="stat-change up">—</div>
+          </div>
+          <div class="stat-card" id="stat-parks">
+            <div class="stat-label">Parques Ativos</div>
+            <div class="stat-value">—</div>
+            <div class="stat-change">—</div>
+          </div>
+          <div class="stat-card" id="stat-revenue">
+            <div class="stat-label">Receita Total</div>
+            <div class="stat-value">—</div>
+            <div class="stat-change up">—</div>
+          </div>
+        </div>
+
+        <!-- Tables -->
+        <div class="two-col">
+          <!-- Recent Users -->
+          <div class="card" style="padding:0;overflow:hidden">
+            <div class="flex-between" style="padding:var(--space-lg);border-bottom:1px solid var(--color-border)">
+              <div style="font-weight:700;font-family:var(--font-display)">Últimos Utilizadores</div>
+              <a href="admin-users.html" style="font-size:0.82rem;color:var(--color-accent)">Ver todos →</a>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Estado</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="recent-users-tbody"></tbody>
+            </table>
+          </div>
+
+          <!-- Recent Reservations -->
+          <div class="card" style="padding:0;overflow:hidden">
+            <div class="flex-between" style="padding:var(--space-lg);border-bottom:1px solid var(--color-border)">
+              <div style="font-weight:700;font-family:var(--font-display)">Últimas Reservas</div>
+              <a href="admin-reservations.html" style="font-size:0.82rem;color:var(--color-accent)">Ver todas →</a>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Parque</th>
+                  <th>Lugar</th>
+                  <th>Data</th>
+                  <th>Horário</th>
+                  <th>Estado</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody id="recent-res-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Park Occupancies -->
+        <div class="card" style="margin-top:var(--space-xl);padding:var(--space-xl)">
+          <div class="flex-between" style="margin-bottom:var(--space-lg)">
+            <div style="font-weight:700;font-family:var(--font-display);font-size:1rem;letter-spacing:0.05em;text-transform:uppercase">
+              Ocupação dos Parques
+            </div>
+            <a href="admin-parks.html" id="add-park-link" style="font-size:0.85rem;color:var(--color-text-muted)">+ Adicionar parque</a>
+          </div>
+          <div id="park-occupancies"
+               style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--space-xl)">
+          </div>
+        </div>
+
+      </div><!-- /admin-content -->
+    </div><!-- /admin-layout -->
+  </main>
+
+  <div id="toast-container"></div>
+
+  <script src="../models/Model.js"></script>
+  <script src="../assets/js/View.js"></script>
+  <script src="../assets/js/adminPanel.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", initAdminDashboard);</script>
+</body>
+</html>

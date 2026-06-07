@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minhas Reservas — Smart Parking</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-page="reservations">
+
+  <div id="navbar-placeholder"></div>
+
+  <main class="page-wrapper">
+    <div class="container section">
+
+      <div class="flex-between" style="margin-bottom:var(--space-2xl)">
+        <div>
+          <div class="section-label">Reservas</div>
+          <h1 class="section-title" style="margin-bottom:0">Minhas Reservas</h1>
+        </div>
+        <a href="dashboard.html" class="btn btn-primary">+ Nova Reserva</a>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="grid-4" style="margin-bottom:var(--space-2xl)">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-value" style="font-size:1.8rem">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Ativas</div>
+          <div class="stat-value" style="font-size:1.8rem;color:var(--color-warning)">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Concluídas</div>
+          <div class="stat-value" style="font-size:1.8rem;color:var(--color-success)">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Canceladas</div>
+          <div class="stat-value" style="font-size:1.8rem;color:var(--color-danger)">—</div>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div style="margin-bottom:var(--space-lg);display:flex;gap:var(--space-md);flex-wrap:wrap;align-items:center">
+        <input class="form-input" type="text" placeholder="Pesquisar por parque ou lugar..." style="max-width:280px">
+        <select class="form-select" style="width:auto">
+          <option value="">Todos os estados</option>
+          <option value="active">Ativa</option>
+          <option value="pending">Pendente</option>
+          <option value="completed">Concluída</option>
+          <option value="cancelled">Cancelada</option>
+        </select>
+        <input class="form-input" type="date" style="width:auto">
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Parque</th>
+              <th>Lugar</th>
+              <th>Data</th>
+              <th>Horário</th>
+              <th>Estado</th>
+              <th>Valor</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="reservations-tbody">
+            <tr>
+              <td colspan="7" style="text-align:center;padding:2rem;color:var(--color-text-muted)">A carregar reservas...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="modal-pay-posterior">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Efetuar Pagamento</div>
+        <button class="modal-close">✕</button>
+      </div>
+
+      <form id="pay-posterior-form">
+        <input type="hidden" id="pay-posterior-res-id">
+
+        <div class="flex-col" style="gap:var(--space-md)">
+          <div style="padding:var(--space-md);background:var(--color-surface-2);border-radius:var(--radius-sm); display:flex; justify-content:space-between; align-items:center">
+            <span style="font-size:0.85rem;color:var(--color-text-muted)">Valor a Pagar:</span>
+            <span style="font-family:var(--font-display); font-size:1.3rem; font-weight:800; color:var(--color-accent)" id="pay-posterior-amount">—</span>
+          </div>
+
+          <!-- Método de Pagamento (Cards Premium) -->
+          <div class="form-group" style="margin-top:var(--space-xs)">
+            <label class="form-label" style="margin-bottom:8px">Método de Pagamento</label>
+            <input type="hidden" id="pay-posterior-method-select" value="MBWay">
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;" id="pay-posterior-methods-grid">
+              <div class="payment-method-card active" data-method="MBWay" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px 8px; border:1.5px solid var(--color-accent); border-radius:var(--radius-md); background:var(--color-surface-2); cursor:pointer; transition:all var(--transition)">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/MB_Way_logo.svg" alt="MB WAY" style="height:20px; object-fit:contain">
+                <span style="font-size:0.75rem; font-weight:600">MB WAY</span>
+              </div>
+              <div class="payment-method-card" data-method="Cartao" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px 8px; border:1.5px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-surface); cursor:pointer; transition:all var(--transition)">
+                <span style="font-size:1.2rem">💳</span>
+                <span style="font-size:0.75rem; font-weight:600">Cartão</span>
+              </div>
+              <div class="payment-method-card" data-method="Multibanco" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px 8px; border:1.5px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-surface); cursor:pointer; transition:all var(--transition)">
+                <span style="font-size:1.2rem">🏦</span>
+                <span style="font-size:0.75rem; font-weight:600">Multibanco</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Campos dinâmicos do pagamento -->
+          <div id="pay-posterior-fields-container" style="background:var(--color-surface-2); padding:var(--space-md); border-radius:var(--radius-sm); border:1px solid var(--color-border); margin-bottom:var(--space-xs)">
+            <!-- MBWay -->
+            <div id="pay-posterior-field-mbway" class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:0.8rem">Nº Telemóvel MB WAY</label>
+              <input class="form-input" type="tel" id="pay-posterior-phone" placeholder="912 345 678" style="font-size:0.9rem">
+            </div>
+            <!-- Cartão -->
+            <div id="pay-posterior-field-cartao" class="form-group" style="display:none; margin-bottom:0">
+              <label class="form-label" style="font-size:0.8rem">Número do Cartão</label>
+              <input class="form-input" type="text" id="pay-posterior-card-num" placeholder="4000 1234 5678 9010" style="font-size:0.9rem; margin-bottom:8px">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+                <input class="form-input" type="text" id="pay-posterior-card-exp" placeholder="MM/AA" style="font-size:0.9rem">
+                <input class="form-input" type="text" id="pay-posterior-card-cvv" placeholder="CVC" style="font-size:0.9rem">
+              </div>
+            </div>
+            <!-- Multibanco -->
+            <div id="pay-posterior-field-multibanco" style="display:none; text-align:center; font-size:0.85rem; color:var(--color-text-muted)">
+              <div style="margin-bottom:4px">A entidade e referência serão geradas ao confirmar.</div>
+              <div>Poderá pagar no seu homebanking ou caixa ATM.</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" type="submit" style="width:100%; height:44px; font-weight:700">
+            Confirmar Pagamento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <div id="toast-container"></div>
+
+  <script src="../assets/js/View.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Ler sessão
+      const token = localStorage.getItem('token');
+      let user = null;
+      try {
+        user = JSON.parse(localStorage.getItem('user'));
+      } catch (e) {}
+
+      if (!user || !token) {
+        View.showPopup({
+          title: 'Sessão expirada',
+          message: 'Por favor, faça login novamente para continuar.',
+          type: 'warning',
+          redirect: 'login.html'
+        });
+        return;
+      }
+
+      // 2. Injetar Navbar e Footer
+      document.body.insertAdjacentHTML('afterbegin', View.renderNavbar(user));
+      document.body.insertAdjacentHTML('beforeend',  View.renderFooter());
+
+      // 3. Logout com Confirmação
+      document.getElementById('btn-logout')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const confirmLogout = await View.showConfirm({
+          title: 'Terminar Sessão',
+          message: 'Tem a certeza que deseja terminar a sessão?',
+          type: 'warning',
+          confirmText: 'Sair',
+          cancelText: 'Cancelar'
+        });
+        if (confirmLogout) {
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+          window.location.href = 'login.html';
+        }
+      });
+
+      let allReservations = [];
+      let allParks = [];
+
+      // 4. Carregar Parques (para Nav Search e mapear nomes)
+      async function loadParks() {
+        try {
+          const response = await fetch('http://localhost:3000/api/parks');
+          if (response.ok) {
+            allParks = await response.json();
+            View.initNavSearch(allParks);
+          }
+        } catch (err) {
+          console.error('Erro ao carregar parques:', err);
+        }
+      }
+
+      // 5. Carregar Reservas
+      async function loadReservations() {
+        const tbody = document.getElementById('reservations-tbody');
+        if (!tbody) return;
+
+        try {
+          const res = await fetch('http://localhost:3000/reservations/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (!res.ok) throw new Error('Erro ao obter reservas');
+          
+          allReservations = await res.json();
+          updateStats(allReservations);
+          renderReservationsTable(allReservations);
+
+        } catch (err) {
+          console.error('Erro ao carregar reservas:', err);
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--color-danger);padding:2rem">Erro ao carregar reservas do servidor.</td></tr>';
+        }
+      }
+
+      // 6. Atualizar Estatísticas Dinâmicas
+      function updateStats(list) {
+        const total = list.length;
+        const active = list.filter(r => r.status === 'active' || r.status === 'confirmed' || r.status === 'pending').length;
+        const completed = list.filter(r => r.status === 'completed').length;
+        const cancelled = list.filter(r => r.status === 'cancelled').length;
+
+        const statCards = document.querySelectorAll('.stat-card .stat-value');
+        if (statCards.length >= 4) {
+          statCards[0].textContent = total;
+          statCards[1].textContent = active;
+          statCards[2].textContent = completed;
+          statCards[3].textContent = cancelled;
+        }
+      }
+
+      // 7. Renderizar Tabela
+      function renderReservationsTable(list) {
+        const tbody = document.getElementById('reservations-tbody');
+        if (!tbody) return;
+
+        if (list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--color-text-muted)">Nenhuma reserva encontrada.</td></tr>`;
+          return;
+        }
+
+        // Sort by date/time descending
+        list.sort((a, b) => new Date(b.date + 'T' + b.start_time) - new Date(a.date + 'T' + a.start_time));
+
+        tbody.innerHTML = list.map(r => {
+          const parkId = r.ParkingSpot?.id_park;
+          const park = allParks.find(p => p.id === parkId);
+          const parkName = park ? park.name : `Parque #${parkId}`;
+          const spotNumber = r.ParkingSpot?.spot_number || `Lugar #${r.id_spot}`;
+
+          const statusMap = {
+            active:    { label: 'Ativa',      cls: 'success' },
+            confirmed: { label: 'Confirmada', cls: 'success' },
+            pending:   { label: 'Pendente',   cls: 'warning' },
+            completed: { label: 'Concluída',  cls: 'neutral' },
+            cancelled: { label: 'Cancelada',  cls: 'danger' },
+          };
+          const s = statusMap[r.status] || { label: r.status, cls: 'neutral' };
+
+          let amountStr = '-';
+          if (r.Payment && r.Payment.amount !== undefined && r.Payment.amount !== null) {
+            amountStr = `€${Number(r.Payment.amount).toFixed(2)}`;
+          } else if (r.start_time && r.end_time) {
+            const [sh, sm] = r.start_time.split(':').map(Number);
+            const [eh, em] = r.end_time.split(':').map(Number);
+            const hours = (eh + em/60) - (sh + sm/60);
+            if (hours > 0) {
+              amountStr = `€${(hours * 1.50).toFixed(2)}`;
+            }
+          }
+
+          const now = new Date();
+          const [rYear, rMonth, rDay] = r.date.split('-').map(Number);
+          const [rHour, rMin] = r.start_time.split(':').map(Number);
+          const startDatetime = new Date(rYear, rMonth - 1, rDay, rHour, rMin);
+          const hasStarted = now >= startDatetime;
+          const limitDatetime = new Date(startDatetime.getTime() - 30 * 60 * 1000);
+          const payExpired = now >= limitDatetime;
+
+          const canCancel = (r.status === 'active' || r.status === 'confirmed' || r.status === 'pending') && !hasStarted;
+          const canPay = r.status === 'pending' && !payExpired;
+
+          return `
+            <tr>
+              <td>${parkName}</td>
+              <td>${spotNumber}</td>
+              <td>${r.date}</td>
+              <td>${r.start_time} – ${r.end_time}</td>
+              <td><span class="badge badge-${s.cls}">${s.label}</span></td>
+              <td>${amountStr}</td>
+              <td>
+                <div style="display:flex; gap:6px; align-items:center">
+                  ${canPay 
+                    ? `<button class="btn btn-primary btn-sm btn-pay-now-action" data-id="${r.id_reservation || r.id}" data-amount="${amountStr}">Pagar</button>`
+                    : ''}
+                  ${canCancel 
+                    ? `<button class="btn btn-danger btn-sm btn-cancel-res" data-id="${r.id_reservation || r.id}">Cancelar</button>`
+                    : ''}
+                  ${!canCancel && !canPay 
+                    ? `<span class="text-muted" style="font-size:0.8rem">—</span>`
+                    : ''}
+                </div>
+              </td>
+            </tr>`;
+        }).join('');
+
+        // Bind para Pagamento Posterior
+        tbody.querySelectorAll('.btn-pay-now-action').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const resId = btn.dataset.id;
+            const amount = btn.dataset.amount;
+            
+            document.getElementById('pay-posterior-res-id').value = resId;
+            document.getElementById('pay-posterior-amount').textContent = amount;
+
+            // Reset cards to MBWay
+            const mbwayCard = document.querySelector('#pay-posterior-methods-grid .payment-method-card[data-method="MBWay"]');
+            if (mbwayCard) mbwayCard.click();
+
+            View.openModal('modal-pay-posterior');
+          });
+        });
+
+        // Bind clicks para Cancelamento
+        tbody.querySelectorAll('.btn-cancel-res').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const resId = btn.dataset.id;
+            const confirmCancel = await View.showConfirm({
+              title: 'Cancelar Reserva',
+              message: 'Tem a certeza que deseja cancelar esta reserva?',
+              type: 'danger',
+              confirmText: 'Sim, cancelar',
+              cancelText: 'Voltar'
+            });
+
+            if (confirmCancel) {
+              try {
+                const cancelRes = await fetch(`http://localhost:3000/reservations/${resId}/cancel`, {
+                  method: 'PUT',
+                  headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                  }
+                });
+
+                if (cancelRes.ok) {
+                  View.showToast('Reserva cancelada com sucesso!', 'success');
+                  await loadReservations();
+                } else {
+                  const data = await cancelRes.json();
+                  View.showPopup({
+                    title: 'Erro ao cancelar',
+                    message: data.error || 'Não foi possível cancelar a reserva.',
+                    type: 'error'
+                  });
+                }
+              } catch (err) {
+                View.showPopup({
+                  title: 'Erro de ligação',
+                  message: 'Não foi possível ligar ao servidor.',
+                  type: 'error'
+                });
+              }
+            }
+          });
+        });
+      }
+
+      // 8. Filtros Locais
+      const searchInput = document.querySelector('.form-input[type="text"]');
+      const statusSelect = document.querySelector('.form-select');
+      const dateInput = document.querySelector('.form-input[type="date"]');
+
+      function filterReservations() {
+        const query = searchInput.value.trim().toLowerCase();
+        const status = statusSelect.value;
+        const dateVal = dateInput.value;
+
+        const filtered = allReservations.filter(r => {
+          const parkId = r.ParkingSpot?.id_park;
+          const park = allParks.find(p => p.id === parkId);
+          const parkName = park ? park.name.toLowerCase() : '';
+          const spotNumber = r.ParkingSpot?.spot_number?.toLowerCase() || '';
+
+          const matchesQuery = !query || 
+            parkName.includes(query) || 
+            spotNumber.includes(query);
+
+          const matchesStatus = !status || r.status === status;
+          const matchesDate = !dateVal || r.date === dateVal;
+
+          return matchesQuery && matchesStatus && matchesDate;
+        });
+
+        renderReservationsTable(filtered);
+      }
+
+      searchInput?.addEventListener('input', filterReservations);
+      statusSelect?.addEventListener('change', filterReservations);
+      dateInput?.addEventListener('change', filterReservations);
+
+      // 9. Lógica do modal de pagamento posterior (toggles e formulário)
+      const payMethodSelect = document.getElementById('pay-posterior-method-select');
+      const fieldMbway = document.getElementById('pay-posterior-field-mbway');
+      const fieldCartao = document.getElementById('pay-posterior-field-cartao');
+      const fieldMultibanco = document.getElementById('pay-posterior-field-multibanco');
+
+      const updatePaymentFields = (method) => {
+        if (fieldMbway) fieldMbway.style.display = method === 'MBWay' ? 'block' : 'none';
+        if (fieldCartao) fieldCartao.style.display = method === 'Cartao' ? 'block' : 'none';
+        if (fieldMultibanco) fieldMultibanco.style.display = method === 'Multibanco' ? 'block' : 'none';
+      };
+
+      payMethodSelect?.addEventListener('change', () => {
+        updatePaymentFields(payMethodSelect.value);
+      });
+
+      const cards = document.querySelectorAll('#pay-posterior-methods-grid .payment-method-card');
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          cards.forEach(c => {
+            c.classList.remove('active');
+            c.style.borderColor = 'var(--color-border)';
+            c.style.background = 'var(--color-surface)';
+          });
+          card.classList.add('active');
+          card.style.borderColor = 'var(--color-accent)';
+          card.style.background = 'var(--color-surface-2)';
+
+          if (payMethodSelect) {
+            payMethodSelect.value = card.dataset.method;
+            payMethodSelect.dispatchEvent(new Event('change'));
+          }
+        });
+      });
+
+      // Fechar modal de pagamento posterior
+      const modalPay = document.getElementById('modal-pay-posterior');
+      modalPay?.addEventListener('click', (e) => {
+        if (e.target === modalPay || e.target.closest('.modal-close')) {
+          modalPay.classList.remove('active');
+        }
+      });
+
+      // Submissão do formulário de pagamento posterior
+      document.getElementById('pay-posterior-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const resId = document.getElementById('pay-posterior-res-id').value;
+        const method = document.getElementById('pay-posterior-method-select').value;
+
+        try {
+          const payRes = await fetch(`http://localhost:3000/reservations/${resId}/pay`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ payment_method: method })
+          });
+
+          const data = await payRes.json();
+
+          if (payRes.ok) {
+            View.showToast('Pagamento confirmado com sucesso!', 'success');
+            modalPay.classList.remove('active');
+            await loadReservations();
+          } else {
+            View.showToast(data.error || 'Erro ao efetuar pagamento', 'error');
+          }
+        } catch (err) {
+          View.showToast('Erro ao ligar ao servidor', 'error');
+        }
+      });
+
+      // Inicialização
+      await loadParks();
+      await loadReservations();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Parking — Estacionamento Inteligente</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=1600&q=80') center/cover no-repeat;
+      opacity: 0.25;
+      transform: scale(1.05);
+      animation: slowZoom 20s ease infinite alternate;
+    }
+    @keyframes slowZoom { to { transform: scale(1.12); } }
+    .hero-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(10,10,10,0.95) 40%, rgba(245,166,35,0.05) 100%);
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 700px; }
+    .hero-label {
+      display: inline-block;
+      background: var(--color-accent-glow);
+      border: 1px solid rgba(245,166,35,0.3);
+      color: var(--color-accent);
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0.3rem 0.8rem;
+      border-radius: var(--radius-full);
+      margin-bottom: var(--space-lg);
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero-title {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-family: var(--font-display); font-weight: 800; line-height: 1.1;
+      margin-bottom: var(--space-lg);
+      animation: fadeUp 0.6s ease 0.1s both;
+    }
+    .hero-subtitle {
+      font-size: 1.1rem; color: var(--color-text-muted);
+      margin-bottom: var(--space-2xl); max-width: 540px;
+      animation: fadeUp 0.6s ease 0.2s both;
+    }
+    .hero-btns { display: flex; gap: var(--space-md); flex-wrap: wrap; animation: fadeUp 0.6s ease 0.3s both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-lg); }
+    .feature-card {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: var(--space-xl);
+      transition: all var(--transition);
+    }
+    .feature-card:hover { border-color: rgba(245,166,35,0.4); transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .feature-icon { font-size: 2rem; margin-bottom: var(--space-md); }
+    .feature-title { font-family: var(--font-display); font-size: 1.1rem; margin-bottom: var(--space-sm); }
+    .feature-text { font-size: 0.875rem; color: var(--color-text-muted); line-height: 1.7; }
+
+    .steps-track {
+      position: relative; display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-xl); padding: var(--space-2xl) 0;
+    }
+    .steps-track::before {
+      content: ''; position: absolute; top: 50%; left: 16.6%; right: 16.6%;
+      height: 2px; background: linear-gradient(90deg, var(--color-accent), rgba(245,166,35,0.2));
+      transform: translateY(-50%);
+    }
+    .step-item { text-align: center; position: relative; z-index: 1; }
+    .step-num {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--color-surface); border: 2px solid var(--color-accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 1.2rem; font-weight: 800;
+      color: var(--color-accent); margin: 0 auto var(--space-lg);
+      box-shadow: 0 0 0 8px var(--color-accent-glow);
+    }
+    .step-icon { font-size: 1.5rem; margin-bottom: var(--space-sm); }
+    .step-title { font-family: var(--font-display); font-size: 1rem; margin-bottom: var(--space-sm); }
+    .step-text { font-size: 0.82rem; color: var(--color-text-muted); line-height: 1.7; }
+    @media(max-width:600px) { .steps-track { grid-template-columns: 1fr; } .steps-track::before { display:none; } }
+
+    .location-card { border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; }
+    .location-card img { width: 100%; height: 200px; object-fit: cover; transition: transform 0.4s ease; }
+    .location-card:hover img { transform: scale(1.05); }
+    .location-card-body {
+      background: var(--color-surface); padding: var(--space-md);
+      border: 1px solid var(--color-border); border-top: none;
+    }
+    .location-name { font-weight: 700; font-size: 0.95rem; }
+    .location-info { font-size: 0.78rem; color: var(--color-text-muted); margin-top: 2px; }
+
+    .stats-band {
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);
+      padding: var(--space-2xl) 0;
+    }
+    .stats-band-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-xl); }
+    .band-stat { text-align: center; }
+    .band-value { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--color-accent); }
+    .band-label { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 4px; }
+    @media(max-width:600px) { .stats-band-grid { grid-template-columns: 1fr 1fr; } }
+
+    .cta-section {
+      background: linear-gradient(135deg, var(--color-surface) 0%, rgba(245,166,35,0.05) 100%);
+      border-top: 1px solid var(--color-border);
+      text-align: center; padding: var(--space-3xl) 0;
+    }
+
+    .parks-loading { text-align: center; color: var(--color-text-muted); padding: var(--space-2xl); }
+  </style>
+</head>
+<body data-page="home">
+
+  <div id="navbar-placeholder"></div>
+
+  <main class="page-wrapper">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-gradient"></div>
+      <div class="container">
+        <div class="hero-content">
+          <span class="hero-label">Estacionamento Inteligente</span>
+          <h1 class="hero-title"><span class="text-accent">Smart</span><br>Parking</h1>
+          <p class="hero-subtitle">
+            Uma solução de estacionamento inteligente que permite encontrar, reservar
+            e gerir lugares de forma rápida, eficiente e sem complicações.
+          </p>
+          <div class="hero-btns">
+            <a href="login.html" class="btn btn-primary btn-lg">Agendar agora</a>
+            <a href="#sobre" class="btn btn-outline btn-lg">Saber mais</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section" id="sobre">
+      <div class="container">
+        <div class="flex-between" style="margin-bottom:var(--space-2xl);flex-wrap:wrap;gap:var(--space-lg)">
+          <div>
+            <div class="section-label">Sobre nós</div>
+            <h2 class="section-title">Porque escolher o<br><span class="text-accent">Smart Parking?</span></h2>
+          </div>
+          <p class="section-subtitle">
+            Transformamos a forma como estaciona, combinando tecnologia e
+            simplicidade para tornar cada experiência mais rápida, prática e sem stress.
+          </p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-title">Facilidade de uso</div>
+            <p class="feature-text">Consulte os lugares disponíveis em tempo real, efetue reservas antecipadas e gira de forma eficaz os períodos de estacionamento.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🅿️</div>
+            <div class="feature-title">Diversidade de parques</div>
+            <p class="feature-text">Uma rede de parques estrategicamente localizados, pensados para oferecer conforto, segurança e acessibilidade em diferentes zonas da cidade.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <div class="feature-title">Segurança garantida</div>
+            <p class="feature-text">Os seus dados e as suas reservas estão protegidos com encriptação de última geração, cumprindo todas as normas do RGPD.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">💳</div>
+            <div class="feature-title">Pagamento fácil</div>
+            <p class="feature-text">Pague com MB Way, cartão de crédito ou débito. Rápido, seguro e sem complicações, diretamente na plataforma.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" style="background:var(--color-surface);border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border)">
+      <div class="container">
+        <div class="section-label">Como funciona</div>
+        <h2 class="section-title">Três passos simples</h2>
+        <p class="section-subtitle">Siga três passos simples para encontrar e reservar o seu lugar de forma rápida e segura.</p>
+        <div class="steps-track">
+          <div class="step-item">
+            <div class="step-num">01</div>
+            <div class="step-icon">📍</div>
+            <div class="step-title">Escolhe o parque e o horário</div>
+            <p class="step-text">Explore os parques disponíveis no mapa e escolha o que melhor se adapta à sua localização e horário.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-num">02</div>
+            <div class="step-icon">📅</div>
+            <div class="step-title">Reserve o teu lugar</div>
+            <p class="step-text">Selecione o lugar pretendido e escolha a sua forma de pagamento preferida — MB Way, cartão ou multibanco.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-num">03</div>
+            <div class="step-icon">🚗</div>
+            <div class="step-title">Estaciona sem complicações</div>
+            <p class="step-text">Dirija-se ao parque com confiança. O seu lugar está garantido e reservado para si.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOCATIONS — carregados da BD -->
+    <section class="section">
+      <div class="container">
+        <div class="section-label">Parques</div>
+        <h2 class="section-title">Os nossos parques</h2>
+        <div class="grid-3" style="margin-top:var(--space-2xl)" id="parks-grid">
+          <div class="parks-loading" style="grid-column:1/-1">A carregar parques...</div>
+        </div>
+        <div style="margin-top:var(--space-xl)">
+          <a href="login.html" class="btn btn-outline">Ver todos →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS BAND -->
+    <div class="stats-band">
+      <div class="container">
+        <div class="stats-band-grid">
+          <div class="band-stat">
+            <div class="band-value" id="stat-reservations">—</div>
+            <div class="band-label">Reservas concluídas</div>
+          </div>
+          <div class="band-stat">
+            <div class="band-value" id="stat-spots">—</div>
+            <div class="band-label">Lugares disponíveis</div>
+          </div>
+          <div class="band-stat">
+            <div class="band-value" id="stat-parks">—</div>
+            <div class="band-label">Parques ativos</div>
+          </div>
+          <div class="band-stat">
+            <div class="band-value">99%</div>
+            <div class="band-label">Satisfação dos utilizadores</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="container">
+        <h2 style="font-size:clamp(1.8rem,3vw,2.5rem);margin-bottom:var(--space-md)">
+          Reserve o seu lugar agora
+        </h2>
+        <p style="color:var(--color-text-muted);margin-bottom:var(--space-xl)">Rápido, seguro e sem complicações.</p>
+        <a href="login.html" class="btn btn-primary btn-lg">Começar agora</a>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="footer-placeholder"></div>
+  <div id="toast-container"></div>
+
+  <script src="../assets/js/View.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.body.insertAdjacentHTML('afterbegin', View.renderNavbar(null));
+      document.body.insertAdjacentHTML('beforeend', View.renderFooter());
+
+      // Carregar parques reais da BD
+      try {
+        const res   = await fetch('http://localhost:3000/api/parks');
+        const parks = await res.json();
+        const grid  = document.getElementById('parks-grid');
+
+        if (parks.length === 0) {
+          grid.innerHTML = '<div class="parks-loading" style="grid-column:1/-1">Nenhum parque disponível.</div>';
+        } else {
+          grid.innerHTML = parks.slice(0, 6).map(p => `
+            <div class="location-card">
+              <img src="${p.img || 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=500&q=80'}"
+                   alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=500&q=80'">
+              <div class="location-card-body">
+                <div class="location-name">${p.name}</div>
+                <div class="location-info">${p.city}</div>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        // Stats reais
+        const total = parks.reduce((acc, p) => acc + (p.capacity || p.total_capacity || 0), 0);
+        const avail = parks.reduce((acc, p) => acc + (p.available || 0), 0);
+        document.getElementById('stat-parks').textContent = parks.length;
+        document.getElementById('stat-spots').textContent = '+' + avail;
+
+      } catch (err) {
+        document.getElementById('parks-grid').innerHTML =
+          '<div class="parks-loading" style="grid-column:1/-1">Erro ao carregar parques.</div>';
+      }
+
+      // Reservas concluídas — só se tiver a rota disponível
+      try {
+        const r = await fetch('http://localhost:3000/admin/stats', {
+          headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+        });
+        if (r.ok) {
+          const d = await r.json();
+          document.getElementById('stat-reservations').textContent = '+' + (d.totalReservations || 0);
+        }
+      } catch {}
+    });
+  </script>
+
+</body>
+</html>

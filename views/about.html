@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sobre Nós — Smart Parking</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .about-hero {
+      background: linear-gradient(135deg, var(--color-surface) 0%, rgba(245,166,35,0.04) 100%);
+      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-3xl) 0;
+    }
+    .team-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      text-align: center;
+      transition: all var(--transition);
+    }
+    .team-card:hover { border-color: rgba(245,166,35,0.4); transform: translateY(-4px); }
+    .team-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: #111;
+      margin: 0 auto var(--space-md);
+    }
+    .team-name { font-family: var(--font-display); font-weight: 700; margin-bottom: 4px; }
+    .team-id { font-size: 0.78rem; color: var(--color-text-muted); }
+  </style>
+</head>
+<body data-page="about">
+  <div id="navbar-placeholder"></div>
+
+  <main class="page-wrapper">
+    <!-- Hero -->
+    <section class="about-hero">
+      <div class="container">
+        <div class="section-label">Sobre nós</div>
+        <h1 class="section-title" style="max-width:600px">
+          Transformamos a forma como <span class="text-accent">estaciona</span>
+        </h1>
+        <p class="section-subtitle" style="max-width:600px">
+          O Smart Parking nasceu da necessidade de resolver um problema real: a dificuldade em encontrar
+          estacionamento nas cidades. Combinamos tecnologia e simplicidade para tornar cada experiência
+          mais rápida, prática e sem stress.
+        </p>
+      </div>
+    </section>
+
+    <!-- Mission -->
+    <section class="section">
+      <div class="container">
+        <div class="grid-2" style="align-items:center;gap:var(--space-3xl)">
+          <div>
+            <div class="section-label">A nossa missão</div>
+            <h2 class="section-title">Estacionamento inteligente para cidades mais fluidas</h2>
+            <p style="color:var(--color-text-muted);line-height:1.8;margin-bottom:var(--space-lg)">
+              O aumento do tráfego rodoviário nos centros urbanos vem provocando um acentuado aumento nos
+              problemas com a mobilidade urbana. O Smart Parking surge como solução inovadora para a otimização
+              do uso dos lugares de estacionar com a ajuda das plataformas digitais.
+            </p>
+            <p style="color:var(--color-text-muted);line-height:1.8">
+              O sistema permite um fácil acesso à informação relativa ao estado dos lugares disponíveis,
+              realizar reservas antecipadas e gerir todo o processo de forma eficiente e segura.
+            </p>
+          </div>
+          <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden;height:320px">
+            <img src="https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=800&q=80" alt="Parking" style="width:100%;height:100%;object-fit:cover;opacity:0.6">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Values -->
+    <section class="section" style="background:var(--color-surface);border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border)">
+      <div class="container">
+        <div class="section-label">Os nossos valores</div>
+        <h2 class="section-title" style="margin-bottom:var(--space-2xl)">O que nos guia</h2>
+        <div class="grid-4">
+          <div class="card" style="text-align:center">
+            <div style="font-size:2rem;margin-bottom:var(--space-md)">⚡</div>
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:var(--space-sm)">Eficiência</div>
+            <p style="font-size:0.85rem;color:var(--color-text-muted)">Processos rápidos e sem complicações para o utilizador.</p>
+          </div>
+          <div class="card" style="text-align:center">
+            <div style="font-size:2rem;margin-bottom:var(--space-md)">🔒</div>
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:var(--space-sm)">Segurança</div>
+            <p style="font-size:0.85rem;color:var(--color-text-muted)">Dados protegidos e transações seguras em conformidade com o RGPD.</p>
+          </div>
+          <div class="card" style="text-align:center">
+            <div style="font-size:2rem;margin-bottom:var(--space-md)">🌿</div>
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:var(--space-sm)">Sustentabilidade</div>
+            <p style="font-size:0.85rem;color:var(--color-text-muted)">Menos tempo à procura = menos emissões e menos congestionamento.</p>
+          </div>
+          <div class="card" style="text-align:center">
+            <div style="font-size:2rem;margin-bottom:var(--space-md)">🤝</div>
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:var(--space-sm)">Confiança</div>
+            <p style="font-size:0.85rem;color:var(--color-text-muted)">Transparência em cada reserva e interação com o utilizador.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team -->
+    <section class="section">
+      <div class="container">
+        <div class="section-label">A equipa</div>
+        <h2 class="section-title" style="margin-bottom:var(--space-2xl)">Grupo 11 — WEBPII</h2>
+        <div class="grid-3" style="max-width:700px">
+          <div class="team-card">
+            <div class="team-avatar">TL</div>
+            <div class="team-name">Thiago Da Luz</div>
+            <div class="team-id">Nº 40240380</div>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar">DC</div>
+            <div class="team-name">Délcio Cunha</div>
+            <div class="team-id">Nº 40240378</div>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar">AP</div>
+            <div class="team-name">Aristides Paris</div>
+            <div class="team-id">Nº 40190408</div>
+          </div>
+        </div>
+        <p style="margin-top:var(--space-xl);color:var(--color-text-muted);font-size:0.85rem">
+          ESMAD — Escola Superior de Media Artes e Design, Politécnico do Porto<br>
+          Licenciatura em Tecnologias e Sistemas de Informação para Web
+        </p>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section style="background:var(--color-surface);border-top:1px solid var(--color-border);padding:var(--space-3xl) 0;text-align:center">
+      <div class="container">
+        <h2 style="font-size:2rem;margin-bottom:var(--space-md)">Pronto para começar?</h2>
+        <p style="color:var(--color-text-muted);margin-bottom:var(--space-xl)">Crie a sua conta gratuitamente e reserve o seu lugar agora.</p>
+        <div style="display:flex;gap:var(--space-md);justify-content:center;flex-wrap:wrap">
+          <a href="register.html" class="btn btn-primary btn-lg">Criar conta</a>
+          <a href="index.html" class="btn btn-outline btn-lg">Saber mais</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+  <div id="toast-container"></div>
+  <script src="models/Model.js"></script>
+    <script src="../assets/js/View.js"></script>
+  <script src="controllers/Controller.js"></script>
+</body>
+</html>

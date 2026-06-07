@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Reservas — Smart Parking Admin</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .admin-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 64px); }
+    @media(max-width:900px) { .admin-layout { grid-template-columns: 1fr; } }
+    .admin-sidebar { background: var(--color-surface); border-right: 1px solid var(--color-border); padding: var(--space-xl) var(--space-md); position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }
+    .admin-logo { font-family: var(--font-display); font-size: 1rem; font-weight: 800; margin-bottom: var(--space-xs); }
+    .admin-badge { font-size: 0.7rem; color: var(--color-accent); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-xl); }
+    .admin-nav { display: flex; flex-direction: column; gap: 4px; }
+    .admin-nav-link { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-sm); font-size: 0.875rem; color: var(--color-text-muted); cursor: pointer; transition: all var(--transition); text-decoration: none; }
+    .admin-nav-link:hover { background: var(--color-surface-2); color: var(--color-text); }
+    .admin-nav-link.active { background: var(--color-accent-glow); color: var(--color-accent); font-weight: 600; }
+    .admin-content { padding: var(--space-2xl); }
+  </style>
+</head>
+<body data-page="admin-res">
+  <div id="navbar-placeholder"></div>
+
+  <main class="page-wrapper">
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="admin-logo"><span class="text-accent">Smart</span> Parking</div>
+        <div class="admin-badge">Painel Admin</div>
+        <hr style="border-color:var(--color-border);margin-bottom:var(--space-lg)">
+        <nav class="admin-nav">
+          <a href="admin.html"              class="admin-nav-link">Dashboard</a>
+          <a href="admin-parks.html"        class="admin-nav-link"> Parques</a>
+          <a href="admin-users.html"        class="admin-nav-link"> Utilizadores</a>
+          <a href="admin-reservations.html" class="admin-nav-link active"> Reservas</a>
+          <a href="admin-stats.html"        class="admin-nav-link"> Estatísticas</a>
+        </nav>
+      </aside>
+
+      <div class="admin-content">
+        <div class="flex-between" style="margin-bottom:var(--space-2xl)">
+          <div>
+            <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:800">Reservas</h1>
+            <p style="color:var(--color-text-muted);font-size:0.9rem">Todas as reservas do sistema</p>
+          </div>
+          
+        </div>
+
+        <!-- Contadores dinâmicos -->
+        <div class="grid-4" style="margin-bottom:var(--space-2xl)">
+          <div class="stat-card">
+            <div class="stat-label">Total</div>
+            <div class="stat-value" id="res-count-total" style="font-size:1.8rem">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Ativas</div>
+            <div class="stat-value" id="res-count-active" style="font-size:1.8rem;color:var(--color-warning)">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Concluídas</div>
+            <div class="stat-value" id="res-count-completed" style="font-size:1.8rem;color:var(--color-success)">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Canceladas</div>
+            <div class="stat-value" id="res-count-cancelled" style="font-size:1.8rem;color:var(--color-danger)">—</div>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div style="margin-bottom:var(--space-lg);display:flex;gap:var(--space-md);flex-wrap:wrap">
+          <input class="form-input" id="res-search" type="text" placeholder="Pesquisar reserva..." style="max-width:280px">
+          <select class="form-select" id="res-filter-status" style="width:auto">
+            <option value="">Todos os estados</option>
+            <option value="active">Ativa</option>
+            <option value="confirmed">Confirmada</option>
+            <option value="completed">Concluída</option>
+            <option value="cancelled">Cancelada</option>
+          </select>
+          <input class="form-input" id="res-filter-date" type="date" style="width:auto">
+          <select class="form-select" id="res-filter-park" style="width:auto">
+            <option value="">Todos os parques</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Parque</th>
+                <th>Lugar</th>
+                <th>Utilizador</th>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Estado</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="admin-res-tbody">
+              <tr><td colspan="8" style="text-align:center;color:var(--color-text-muted)">A carregar...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast-container"></div>
+  <script src="../assets/js/adminPanel.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", initAdminReservations);</script>
+</body>
+</html>

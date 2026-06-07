@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Utilizadores — Smart Parking Admin</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .admin-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 64px); }
+    @media(max-width:900px) { .admin-layout { grid-template-columns: 1fr; } }
+    .admin-sidebar { background: var(--color-surface); border-right: 1px solid var(--color-border); padding: var(--space-xl) var(--space-md); position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }
+    .admin-logo { font-family: var(--font-display); font-size: 1rem; font-weight: 800; margin-bottom: var(--space-xs); }
+    .admin-badge { font-size: 0.7rem; color: var(--color-accent); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-xl); }
+    .admin-nav { display: flex; flex-direction: column; gap: 4px; }
+    .admin-nav-link { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-sm); font-size: 0.875rem; color: var(--color-text-muted); cursor: pointer; transition: all var(--transition); text-decoration: none; }
+    .admin-nav-link:hover { background: var(--color-surface-2); color: var(--color-text); }
+    .admin-nav-link.active { background: var(--color-accent-glow); color: var(--color-accent); font-weight: 600; }
+    .admin-content { padding: var(--space-2xl); }
+  </style>
+</head>
+<body data-page="admin-users">
+  <div id="navbar-placeholder"></div>
+
+  <main class="page-wrapper">
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="admin-logo"><span class="text-accent">Smart</span> Parking</div>
+        <div class="admin-badge">Painel Admin</div>
+        <hr style="border-color:var(--color-border);margin-bottom:var(--space-lg)">
+        <nav class="admin-nav">
+          <a href="admin.html"              class="admin-nav-link">Dashboard</a>
+          <a href="admin-parks.html"        class="admin-nav-link"> Parques</a>
+          <a href="admin-users.html"        class="admin-nav-link active"> Utilizadores</a>
+          <a href="admin-reservations.html" class="admin-nav-link"> Reservas</a>
+          <a href="admin-stats.html"        class="admin-nav-link"> Estatísticas</a>
+        </nav>
+      </aside>
+
+      <div class="admin-content">
+        <div class="flex-between" style="margin-bottom:var(--space-2xl)">
+          <div>
+            <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:800">Utilizadores</h1>
+            <p style="color:var(--color-text-muted);font-size:0.9rem">Gestão dos utilizadores registados</p>
+          </div>
+          <div style="display:flex;gap:var(--space-sm)">
+            
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="grid-4" style="margin-bottom:var(--space-2xl)">
+          <div class="stat-card">
+            <div class="stat-label">Total</div>
+            <div class="stat-value" style="font-size:1.8rem" id="count-total">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Ativos</div>
+            <div class="stat-value" style="font-size:1.8rem;color:var(--color-success)" id="count-active">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Bloqueados</div>
+            <div class="stat-value" style="font-size:1.8rem;color:var(--color-danger)" id="count-blocked">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Admins</div>
+            <div class="stat-value" style="font-size:1.8rem;color:var(--color-accent)" id="count-admins">—</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div style="margin-bottom:var(--space-lg);display:flex;gap:var(--space-md);flex-wrap:wrap">
+          <input class="form-input" id="filter-search" type="text" placeholder="Pesquisar por nome ou email..." style="max-width:300px">
+          <select class="form-select" id="filter-status" style="width:auto">
+            <option value="">Todos os estados</option>
+            <option value="ACTIVE">Ativo</option>
+            <option value="BLOCK">Bloqueado</option>
+          </select>
+          <select class="form-select" id="filter-role" style="width:auto">
+            <option value="">Todos os papéis</option>
+            <option value="USER">Utilizador</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Estado</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast-container"></div>
+  <script src="../assets/js/View.js"></script>
+  <script src="../assets/js/adminPanel.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", initAdminUsers);</script>
+</body>
+</html>

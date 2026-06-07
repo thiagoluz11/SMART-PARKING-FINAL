@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estatísticas — Smart Parking Admin</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .admin-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 64px); }
+    @media(max-width:900px) { .admin-layout { grid-template-columns: 1fr; } }
+    .admin-sidebar { background: var(--color-surface); border-right: 1px solid var(--color-border); padding: var(--space-xl) var(--space-md); position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }
+    .admin-logo { font-family: var(--font-display); font-size: 1rem; font-weight: 800; margin-bottom: var(--space-xs); }
+    .admin-badge { font-size: 0.7rem; color: var(--color-accent); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-xl); }
+    .admin-nav { display: flex; flex-direction: column; gap: 4px; }
+    .admin-nav-link { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-sm); font-size: 0.875rem; color: var(--color-text-muted); cursor: pointer; transition: all var(--transition); text-decoration: none; }
+    .admin-nav-link:hover { background: var(--color-surface-2); color: var(--color-text); }
+    .admin-nav-link.active { background: var(--color-accent-glow); color: var(--color-accent); font-weight: 600; }
+    .admin-content { padding: var(--space-2xl); }
+
+    /* Charts */
+    .chart-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-xl); }
+    .chart-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; margin-bottom: var(--space-lg); }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 10px; height: 180px; padding-top: var(--space-md); }
+    .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .bar {
+      width: 100%;
+      background: var(--color-accent);
+      border-radius: 4px 4px 0 0;
+      transition: all 0.6s ease;
+      position: relative;
+      cursor: pointer;
+      min-height: 4px;
+    }
+    .bar:hover { background: var(--color-accent-dark); }
+    .bar-label { font-size: 0.7rem; color: var(--color-text-muted); }
+    .bar-value { font-size: 0.7rem; color: var(--color-accent); font-weight: 700; }
+
+    /* Line chart (CSS-only) */
+    .line-chart-wrap {
+      position: relative;
+      height: 180px;
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+    }
+    .line-chart-points {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+    }
+
+    /* Donut charts */
+    .donut-row { display: flex; gap: var(--space-2xl); flex-wrap: wrap; }
+    .donut-item { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); }
+    .donut {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .donut-label {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      text-align: center;
+    }
+    .donut-value {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--color-accent);
+    }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); }
+    @media(max-width:900px) { .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body data-page="admin-stats">
+  <div id="navbar-placeholder"></div>
+
+  <main class="page-wrapper">
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="admin-logo"><span class="text-accent">Smart</span> Parking</div>
+        <div class="admin-badge">Painel Admin</div>
+        <hr style="border-color:var(--color-border);margin-bottom:var(--space-lg)">
+        <nav class="admin-nav">
+          <a href="admin.html"              class="admin-nav-link"> Dashboard</a>
+          <a href="admin-parks.html"        class="admin-nav-link"> Parques</a>
+          <a href="admin-users.html"        class="admin-nav-link"> Utilizadores</a>
+          <a href="admin-reservations.html" class="admin-nav-link"> Reservas</a>
+          <a href="admin-stats.html"        class="admin-nav-link active">Estatísticas</a>
+        </nav>
+      </aside>
+
+      <div class="admin-content">
+        <div style="margin-bottom:var(--space-2xl)">
+          <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:800">Estatísticas</h1>
+          <p style="color:var(--color-text-muted);font-size:0.9rem">Análise de desempenho do sistema</p>
+        </div>
+
+        <!-- KPI Stats -->
+        <div class="grid-4" style="margin-bottom:var(--space-2xl)" id="stat-reservations-wrap">
+          <div class="stat-card" id="stat-reservations">
+            <div class="stat-label">Reservas Totais</div>
+            <div class="stat-value">—</div>
+            <div class="stat-change up">—</div>
+          </div>
+          <div class="stat-card" id="stat-users">
+            <div class="stat-label">Utilizadores</div>
+            <div class="stat-value">—</div>
+            <div class="stat-change up">—</div>
+          </div>
+          <div class="stat-card" id="stat-parks">
+            <div class="stat-label">Parques Ativos</div>
+            <div class="stat-value">—</div>
+            <div class="stat-change">—</div>
+          </div>
+          <div class="stat-card" id="stat-revenue">
+            <div class="stat-label">Receita Total</div>
+            <div class="stat-value">—</div>
+            <div class="stat-change up">—</div>
+          </div>
+        </div>
+
+        <!-- Charts row 1 -->
+        <div class="two-col" style="margin-bottom:var(--space-xl)">
+          <!-- Reservations by month bar chart -->
+          <div class="chart-card">
+            <div class="chart-title">Reservas por mês</div>
+            <div class="bar-chart" id="bar-chart-reservations"></div>
+          </div>
+
+          <!-- Revenue line chart area -->
+          <div class="chart-card">
+            <div class="chart-title">Receita mensal (€)</div>
+            <div class="bar-chart" id="bar-chart-revenue"></div>
+          </div>
+        </div>
+
+        <!-- Charts row 2 -->
+        <div class="two-col" style="margin-bottom:var(--space-xl)">
+          <!-- Park occupancy -->
+          <div class="chart-card">
+            <div class="chart-title">Ocupação dos Parques</div>
+            <div id="park-occupancies"></div>
+          </div>
+
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <div id="toast-container"></div>
+  <script src="../models/Model.js"></script>
+  <script src="../assets/js/View.js"></script>
+  <script src="../assets/js/adminPanel.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", initAdminStats);</script>
+  <script>
+    // Sobrescrever initAdminStats para usar dados reais
+    const _initAdminStatsCharts = async () => {
+      const token = localStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+
+      try {
+        const res  = await fetch('http://localhost:3000/admin/stats', { headers });
+        const data = await res.json();
+
+        // ── KPIs
+        const setEl = (id, val) => { const el = document.querySelector(id + ' .stat-value'); if (el) el.textContent = val; };
+        setEl('#stat-reservations', data.totalReservations ?? '—');
+        setEl('#stat-users',        data.totalUsers ?? '—');
+        setEl('#stat-parks',        data.totalParks ?? '—');
+        setEl('#stat-revenue',      data.totalRevenue ? '€' + Number(data.totalRevenue).toFixed(2) : '€0');
+
+        // ── Bar chart helper
+        const renderBarChart = (containerId, labels, values, color) => {
+          const el = document.getElementById(containerId);
+          if (!el || !values.length) return;
+          const maxVal = Math.max(...values, 1);
+          el.innerHTML = values.map((val, i) => `
+            <div class="bar-group">
+              <div class="bar-value">${val}</div>
+              <div class="bar" style="height:${Math.round((val / maxVal) * 160)}px;background:${color}"></div>
+              <div class="bar-label">${labels[i]}</div>
+            </div>`).join('');
+        };
+
+        // ── Reservas por mês
+        const monthNames = { '01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun','07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez' };
+        const resLabels  = (data.reservationsByMonth || []).map(r => monthNames[r.month.split('-')[1]] || r.month);
+        const resValues  = (data.reservationsByMonth || []).map(r => Number(r.total));
+        renderBarChart('bar-chart-reservations', resLabels, resValues, 'var(--color-accent)');
+
+        // ── Receita por mês
+        const revLabels = (data.revenueByMonth || []).map(r => monthNames[r.month.split('-')[1]] || r.month);
+        const revValues = (data.revenueByMonth || []).map(r => Number(r.total).toFixed(0));
+        renderBarChart('bar-chart-revenue', revLabels, revValues.map(Number), '#4a9eff');
+
+        // ── Ocupação dos parques
+        const container = document.getElementById('park-occupancies');
+        if (container && data.parkOccupancy) {
+          container.innerHTML = data.parkOccupancy.map(p => {
+            const pct = p.total_capacity > 0 ? Math.round((p.occupied / p.total_capacity) * 100) : 0;
+            return `<div style="margin-bottom:var(--space-md)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:0.85rem">${p.name} <span style="color:var(--color-text-muted);font-size:0.75rem">${p.city}</span></span>
+                <span style="font-size:0.85rem;font-weight:700;color:var(--color-accent)">${p.occupied}/${p.total_capacity}</span>
+              </div>
+              <div style="background:var(--color-surface-2);border-radius:4px;height:8px;overflow:hidden">
+                <div style="background:var(--color-accent);height:100%;width:${pct}%;border-radius:4px;transition:width 0.6s"></div>
+              </div>
+            </div>`;
+          }).join('');
+        }
+
+      } catch (err) { console.error('Stats charts:', err); }
+    };
+
+    document.addEventListener('DOMContentLoaded', _initAdminStatsCharts);
+  </script>
+</body>
+</html>

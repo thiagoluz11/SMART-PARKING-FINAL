@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Veículo — Smart Parking</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-page="profile">
+
+  <main class="page-wrapper">
+    <div class="container section" style="max-width:500px">
+
+      <a href="profile.html" style="color:var(--color-text-muted);font-size:0.9rem">← Voltar ao perfil</a>
+      <h1 class="section-title" style="margin-top:var(--space-lg)">Adicionar Veículo</h1>
+
+      <div class="card" style="padding:var(--space-xl);margin-top:var(--space-lg)">
+        <form id="vehicle-form">
+          <div class="flex-col" style="gap:var(--space-md)">
+            <div class="form-group">
+              <label class="form-label">Matrícula *</label>
+              <input class="form-input" id="v-plate" type="text" placeholder="AA-00-BB" required>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md)">
+              <div class="form-group">
+                <label class="form-label">Marca *</label>
+                <input class="form-input" id="v-brand" type="text" placeholder="Toyota" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Modelo *</label>
+                <input class="form-input" id="v-model" type="text" placeholder="Corolla" required>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md)">
+              <div class="form-group">
+                <label class="form-label">Cor</label>
+                <input class="form-input" id="v-color" type="text" placeholder="Preto">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Combustível</label>
+                <select class="form-input" id="v-type">
+                  <option value="Gasolina">Gasolina</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="Elétrico">Elétrico</option>
+                  <option value="Híbrido">Híbrido</option>
+                </select>
+              </div>
+            </div>
+            <span id="vehicle-msg" style="font-size:0.85rem;color:var(--color-danger)"></span>
+            <div style="display:flex;gap:var(--space-md);margin-top:var(--space-sm)">
+              <button type="submit" class="btn btn-primary" style="flex:1">Guardar</button>
+              <a href="profile.html" class="btn" style="flex:1;text-align:center">Cancelar</a>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toast-container"></div>
+  <script src="../assets/js/View.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+      if (!token || !user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.body.insertAdjacentHTML('afterbegin', View.renderNavbar(user));
+      document.body.insertAdjacentHTML('beforeend', View.renderFooter());
+
+      document.getElementById('vehicle-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const msgEl = document.getElementById('vehicle-msg');
+
+        const body = {
+          license_plate: document.getElementById('v-plate').value.trim(),
+          brand: document.getElementById('v-brand').value.trim(),
+          model: document.getElementById('v-model').value.trim(),
+          color: document.getElementById('v-color').value.trim() || 'Não definido',
+          vehicle_type: document.getElementById('v-type').value
+        };
+
+        try {
+          const res = await fetch('http://localhost:3000/users/me/vehicles', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(body)
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            window.location.href = 'profile.html';
+          } else {
+            msgEl.textContent = data.error || 'Erro ao guardar.';
+          }
+        } catch (err) {
+          msgEl.textContent = 'Erro ao ligar ao servidor.';
+        }
+      };
+    });
+  </script>
+</body>
+</html>
