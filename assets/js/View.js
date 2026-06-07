@@ -117,7 +117,7 @@ const View = (() => {
         <div class="navbar-inner">
           <a href="index.html" class="navbar-logo"><span class="text-accent">Smart</span> Parking</a>
           <div class="navbar-nav">
-            <a href="index.html#sobre" class="nav-link">Sobre nós</a>
+            <a href="about.html" class="nav-link">Sobre nós</a>
             <a href="register.html" class="nav-link">Registo</a>
             <a href="login.html" class="nav-link highlight">Login</a>
           </div>
@@ -131,7 +131,7 @@ const View = (() => {
         <div class="navbar-inner">
           <a href="index.html" class="navbar-logo"><span class="text-accent">Smart</span> Parking</a>
           <div class="navbar-nav">
-            <a href="index.html#sobre" class="nav-link">Sobre nós</a>
+            <a href="about.html" class="nav-link">Sobre nós</a>
             <a href="register.html" class="nav-link">Registo</a>
             <a href="login.html" class="nav-link highlight">Login</a>
           </div>
@@ -146,20 +146,13 @@ const View = (() => {
       return `
       <nav class="navbar">
         <div class="navbar-inner">
-          <a href="index.html" class="navbar-logo"><span class="text-accent">Smart</span> Parking</a>
+          <a href="admin.html" class="navbar-logo"><span class="text-accent">Smart</span> Parking</a>
           <div class="navbar-nav" id="navbar-nav">
-            <a href="admin.html" class="nav-link">Dashboard</a>
-            <a href="admin-parks.html" class="nav-link">Parques</a>
-            <a href="admin-users.html" class="nav-link">Utilizadores</a>
-            <a href="admin-reservations.html" class="nav-link">Reservas</a>
-            <a href="admin-stats.html" class="nav-link">Estatísticas</a>
+            <span style="font-weight: 700; color: var(--color-accent); font-size: 0.9rem; letter-spacing: 0.05em; text-transform: uppercase;">Painel de Administração</span>
           </div>
           <div class="navbar-actions">
             <span class="text-muted navbar-username" style="font-size:0.85rem">${user.name}</span>
             <button class="btn btn-ghost btn-sm" id="btn-logout">Sair</button>
-            <button class="navbar-hamburger" id="navbar-hamburger" aria-label="Menu">
-              <span></span><span></span><span></span>
-            </button>
           </div>
         </div>
       </nav>`;
@@ -189,24 +182,55 @@ const View = (() => {
   };
 
 
-  // ── Hamburger Menu ────────────────────────────────────────────────────
+  // ── Hamburger Menu (Delegado) ─────────────────────────────────────────
   const initHamburger = () => {
-    const btn = document.getElementById('navbar-hamburger');
-    const nav = document.getElementById('navbar-nav');
-    if (!btn || !nav) return;
-    btn.addEventListener('click', () => {
-      const open = nav.classList.toggle('mobile-open');
-      btn.classList.toggle('active', open);
-    });
-    // fechar ao clicar num link
-    nav.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        nav.classList.remove('mobile-open');
-        btn.classList.remove('active');
-      });
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#navbar-hamburger');
+      if (btn) {
+        const nav = document.getElementById('navbar-nav');
+        if (nav) {
+          const open = nav.classList.toggle('mobile-open');
+          btn.classList.toggle('active', open);
+        }
+        return;
+      }
+
+      // Fechar ao clicar num link da navbar móvel
+      const link = e.target.closest('.navbar-nav.mobile-open .nav-link');
+      if (link) {
+        const nav = document.getElementById('navbar-nav');
+        const hamburger = document.getElementById('navbar-hamburger');
+        if (nav) nav.classList.remove('mobile-open');
+        if (hamburger) hamburger.classList.remove('active');
+      }
     });
   };
   document.addEventListener('DOMContentLoaded', initHamburger);
+
+  // ── Global Logout ─────────────────────────────────────────────────────
+  const initLogout = () => {
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('#btn-logout') || e.target.closest('#btn-sidebar-logout');
+      if (!btn) return;
+      e.preventDefault();
+      
+      const confirmLogout = await showConfirm({
+        title: 'Terminar Sessão',
+        message: 'Tem a certeza que deseja terminar a sessão?',
+        type: 'warning',
+        confirmText: 'Sair',
+        cancelText: 'Cancelar'
+      });
+      
+      if (confirmLogout) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+      }
+    });
+  };
+  document.addEventListener('DOMContentLoaded', initLogout);
+
 
   // ── Init Nav Search (call after parks are loaded) ─────────────────────
   const initNavSearch = (parks, onParkSelect) => {

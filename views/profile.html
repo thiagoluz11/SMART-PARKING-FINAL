@@ -99,14 +99,14 @@
         </aside>
 
         <!-- Main content -->
-        <div class="flex-col" style="gap:var(--space-xl)">
+        <div class="flex-col" style="gap:var(--space-xl); min-width: 0;">
 
           <!-- Dados Pessoais -->
           <div class="card" style="padding:var(--space-xl)">
             <h2 style="font-size:1.1rem;font-family:var(--font-display);margin-bottom:var(--space-xl)">Dados Pessoais</h2>
             <form id="profile-form">
               <div class="flex-col" style="gap:var(--space-md)">
-                <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md)">
+                <div class="grid-2" style="gap:var(--space-md)">
                   <div class="form-group">
                     <label class="form-label">Nome completo</label>
                     <input class="form-input" id="profile-name" type="text" placeholder="O teu nome">
@@ -197,25 +197,8 @@
     document.body.insertAdjacentHTML('afterbegin', View.renderNavbar(user));
     document.body.insertAdjacentHTML('beforeend',  View.renderFooter());
 
-    // 3. Logout
-    const handleLogout = async (e) => {
-      e.preventDefault();
-      const confirmLogout = await View.showConfirm({
-        title: 'Terminar Sessão',
-        message: 'Tem a certeza que deseja terminar a sessão?',
-        type: 'warning',
-        confirmText: 'Sair',
-        cancelText: 'Cancelar'
-      });
-      if (confirmLogout) {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        window.location.href = 'login.html';
-      }
-    };
+    // 3. Logout is now handled globally in View.js
 
-    document.getElementById('btn-logout')?.addEventListener('click', handleLogout);
-    document.getElementById('btn-sidebar-logout')?.addEventListener('click', handleLogout);
 
     // ── Função auxiliar: preencher sidebar e avatar ─────────────────────
     function fillSidebar(u) {

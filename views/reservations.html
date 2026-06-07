@@ -46,7 +46,7 @@
         <input class="form-input" type="text" placeholder="Pesquisar por parque ou lugar..." style="max-width:280px">
         <select class="form-select" style="width:auto">
           <option value="">Todos os estados</option>
-          <option value="active">Ativa</option>
+          <option value="confirmed">Confirmada</option>
           <option value="pending">Pendente</option>
           <option value="completed">Concluída</option>
           <option value="cancelled">Cancelada</option>
@@ -173,22 +173,8 @@
       document.body.insertAdjacentHTML('afterbegin', View.renderNavbar(user));
       document.body.insertAdjacentHTML('beforeend',  View.renderFooter());
 
-      // 3. Logout com Confirmação
-      document.getElementById('btn-logout')?.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const confirmLogout = await View.showConfirm({
-          title: 'Terminar Sessão',
-          message: 'Tem a certeza que deseja terminar a sessão?',
-          type: 'warning',
-          confirmText: 'Sair',
-          cancelText: 'Cancelar'
-        });
-        if (confirmLogout) {
-          localStorage.removeItem('user');
-          localStorage.removeItem('token');
-          window.location.href = 'login.html';
-        }
-      });
+      // 3. Logout is now handled globally in View.js
+
 
       let allReservations = [];
       let allParks = [];

@@ -15,7 +15,7 @@
     .admin-nav-link { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-sm); font-size: 0.875rem; color: var(--color-text-muted); cursor: pointer; transition: all var(--transition); text-decoration: none; }
     .admin-nav-link:hover { background: var(--color-surface-2); color: var(--color-text); }
     .admin-nav-link.active { background: var(--color-accent-glow); color: var(--color-accent); font-weight: 600; }
-    .admin-content { padding: var(--space-2xl); }
+    .admin-content { padding: var(--space-2xl); overflow-y: auto; }
   </style>
 </head>
 <body data-page="admin-res">
@@ -52,8 +52,8 @@
             <div class="stat-value" id="res-count-total" style="font-size:1.8rem">—</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Ativas</div>
-            <div class="stat-value" id="res-count-active" style="font-size:1.8rem;color:var(--color-warning)">—</div>
+            <div class="stat-label">Confirmadas</div>
+            <div class="stat-value" id="res-count-confirmed" style="font-size:1.8rem;color:var(--color-warning)">—</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Concluídas</div>
@@ -70,7 +70,6 @@
           <input class="form-input" id="res-search" type="text" placeholder="Pesquisar reserva..." style="max-width:280px">
           <select class="form-select" id="res-filter-status" style="width:auto">
             <option value="">Todos os estados</option>
-            <option value="active">Ativa</option>
             <option value="confirmed">Confirmada</option>
             <option value="completed">Concluída</option>
             <option value="cancelled">Cancelada</option>
@@ -105,6 +104,7 @@
   </main>
 
   <div id="toast-container"></div>
+  <script src="../assets/js/View.js"></script>
   <script src="../assets/js/adminPanel.js"></script>
   <script>document.addEventListener("DOMContentLoaded", initAdminReservations);</script>
 </body>

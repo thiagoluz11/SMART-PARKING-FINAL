@@ -18,6 +18,13 @@ const requireAdmin = () => {
         window.location.href = 'login.html';
         return false;
     }
+
+    // Injetar a Navbar se o placeholder existir
+    const navPlaceholder = document.getElementById('navbar-placeholder');
+    if (navPlaceholder) {
+        navPlaceholder.outerHTML = View.renderNavbar(user);
+    }
+
     return true;
 };
 
@@ -61,7 +68,6 @@ const initAdminDashboard = async () => {
                     <td>${r.date}</td>
                     <td>${r.start_time} – ${r.end_time}</td>
                     <td><span class="badge badge-${r.status === 'active' ? 'success' : 'warning'}">${r.status}</span></td>
-                    <td>—</td>
                 </tr>`).join('');
         }
     } catch (err) { console.error('Reservations:', err); }
@@ -367,7 +373,7 @@ const initAdminReservations = async () => {
             allReservations = Array.isArray(json) ? json : [];
 
             setEl('res-count-total',     allReservations.length);
-            setEl('res-count-active',    allReservations.filter(r => r.status === 'active').length);
+            setEl('res-count-confirmed', allReservations.filter(r => r.status === 'confirmed').length);
             setEl('res-count-completed', allReservations.filter(r => r.status === 'completed').length);
             setEl('res-count-cancelled', allReservations.filter(r => r.status === 'cancelled').length);
 
